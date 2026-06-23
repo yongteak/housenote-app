@@ -1,0 +1,158 @@
+---
+description: React 성능 최적화 규칙 - Vite 환경용, Next.js 제외
+globs:
+  - "src/**/*.tsx"
+  - "src/**/*.ts"
+alwaysApply: true
+---
+
+# React Best Practice
+
+Vercel React 성능 가이드 참고. 이 프로젝트는 `Next.js` 미사용이므로 `RSC`, `after()`, `next/dynamic`, `optimizePackageImports` 등 Next 전용 항목은 제외한다.
+
+## 우선순위
+
+1. 워터폴 제거
+2. 초기 번들 축소
+3. 리렌더 감소
+4. 긴 리스트·무거운 UI 지연 렌더링
+
+## 규칙
+
+### 비동기: 독립 작업은 동시 시작
+
+```ts
+// BAD
+const user = await fetchUser();
+const posts = await fetchPosts();
+
+// GOOD
+const [user, posts] = await Promise.all([fetchUser(), fetchPosts()]);
+```
+
+의존성 없는 요청은 `Promise.all` 등으로 병렬 처리한다.
+
+### `await`는 조기 반환 뒤로
+
+```ts
+// BAD
+const data = await fetchData();
+if (skip) return null;
+return renderData(data);
+
+// GOOD
+if (skip) return null;
+const data = await fetchData();
+return renderData(data);
+```
+
+불필요한 대기를 조건문 앞에 두지 않는다.
+
+### 큰 UI는 지연 로딩
+
+```tsx
+import { lazy, Suspense } from "react";
+
+const HeavyPanel = lazy(() => import("./heavy-panel"));
+```
+
+에디터·차트·대형 모달·복잡 설정 패널은 초기 번들에 넣지 않는다.
+
+### barrel import 기본값 금지
+
+```ts
+// BAD
+import { Menu, X } from "lucide-react";
+
+// GOOD
+import Menu from "lucide-react/dist/esm/icons/menu";
+import X from "lucide-react/dist/esm/icons/x";
+```
+
+아이콘·대형 UI 라이브러리는 필요한 엔트리만 직접 import한다.
+
+### 링크·클릭 요소는 포인터 커서
+
+`<a href>`, `button`, `[role="link"]` 등 클릭으로 동작하는 요소에는 `cursor: pointer`(핸드 커서)를 적용한다. 전역 스타일 또는 컴포넌트 단위로 누락하지 않는다.
+
+### 클라이언트: 동일 데이터 중복 요청 금지
+
+- 상위에서 한 번 조회해 props·context로 전달한다.
+- 반복 호출 엔드포인트는 캐시·dedupe 패턴을 쓴다.
+- 컴포넌트마다 동일 `fetch()`를 중복 호출하지 않는다.
+
+### 상태는 사용 지점까지 지연
+
+```tsx
+// BAD
+const searchParams = new URLSearchParams(location.search);
+const ref = searchParams.get("ref");
+
+// GOOD
+const handleShare = () => {
+  const ref = new URLSearchParams(location.search).get("ref");
+};
+```
+
+렌더에 불필요한 값은 이벤트 핸들러 등에서 읽는다.
+
+### 리렌더 비용 큰 블록 분리
+
+- 무거운 계산·긴 리스트·복잡 카드 묶음은 하위 컴포넌트로 분리한다.
+- 상위 상태 변경이 잦으면 무거운 하위를 격리한다.
+- `memo`·`useMemo`·`useCallback`은 필요할 때만 쓴다.
+
+### effect 의존성 최소화
+
+```ts
+// BAD
+useEffect(() => {
+  syncUser(user.id);
+}, [user]);
+
+// GOOD
+useEffect(() => {
+  syncUser(user.id);
+}, [user.id]);
+```
+
+객체 전체가 아니라 실제 사용 원시값만 의존성에 넣는다.
+
+### 상태 갱신은 함수형 업데이트 우선
+
+```ts
+setItems((current) => [...current, ...nextItems]);
+```
+
+이전 상태에 기대는 갱신은 함수형 업데이트를 쓴다.
+
+### 긴 리스트 DOM 부담 관리
+
+- 항목 수가 많으면 가상화·페이지네이션을 검토한다.
+- 화면 밖 비용이 크면 `content-visibility: auto`를 검토한다.
+- 스크롤 중 아이템에 과한 그림자·blur·transform을 넣지 않는다.
+
+### 조건부 렌더링은 명시
+
+```tsx
+// BAD
+{count && <Badge>{count}</Badge>}
+
+// GOOD
+{count > 0 ? <Badge>{count}</Badge> : null}
+```
+
+`0`·`NaN` 등이 그대로 노출되지 않게 한다.
+
+### 반복 조회는 `Set`·`Map`
+
+배열 `find`·`includes`를 루프 안에서 반복 호출하지 말고 인덱스 구조로 O(1) 조회한다.
+
+## 금지·주의
+
+- 순차 `await` 체인
+- 초기 렌더에 불필요한 대형 라이브러리 즉시 import
+- 동일 API를 여러 컴포넌트에서 중복 호출
+- 상위가 모든 상태를 들고 하위 전체 리렌더
+- 긴 리스트에 과한 애니메이션·시각 효과
+- `Next.js` 전용 API를 일반 React 코드에 그대로 이식

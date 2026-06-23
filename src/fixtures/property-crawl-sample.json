@@ -1,0 +1,220 @@
+{
+  "source_url": "https://fin.land.naver.com/map?zoom=15.535468389196721&layer=NobwRAlgJmBcYEMBOAXCBjANgUwPpWxQQkzABowAHZBAWwGc5xk0tsBJGeAJgDYBmfgFYAjAHYBADjABfCvWzJ0ACwAKNBkzAAvAPa7acMCKEA6IcIAsvSf0kBOEfd5juI2TIC6QA&center=3zjowx-2AMlLx",
+  "source_domain": "fin.land.naver.com",
+  "source_listing_id": "2633517638",
+  "title": "건영2차 · 103동 · 1층 · 31평",
+  "property_type": "아파트",
+  "deal_type": "매매",
+  "address": "서울시 노원구 중계동 515-2",
+  "road_address": "덕릉로 517",
+  "latitude": 37.64672,
+  "longitude": 127.06646,
+  "current_price_text": "7억 9,000",
+  "current_price_value": 790000000,
+  "area_supply_m2": 104.66,
+  "area_private_m2": 84.96,
+  "floor_info": "1/15층",
+  "direction": "남동",
+  "thumbnail_url": null,
+  "image_urls": [],
+  "metadata": {
+    "crawledAt": "2026-06-23T01:13:09.371Z",
+    "crawlSource": "lightpanda-rsc",
+    "articleKey": {
+      "key": {
+        "complexNumber": 228,
+        "pyeongTypeNumber": 2,
+        "buildingNumber": 1188374
+      },
+      "type": {
+        "realEstateType": "A04",
+        "tradeType": "A1"
+      },
+      "address": {
+        "legalDivisionNumber": "1135010600",
+        "jibun": "515-2"
+      },
+      "isRealEstateAssociationArticle": false,
+      "isArticleImageExist": false
+    },
+    "basicInfo": {
+      "priceInfo": {
+        "price": 790000000,
+        "previousDeposit": 0,
+        "previousMonthlyRent": 0,
+        "loan": 0
+      },
+      "detailInfo": {
+        "facilityInfo": {
+          "life": [],
+          "security": [],
+          "etc": [],
+          "aircon": [],
+          "entranceType": "10",
+          "totalParkingCount": 520,
+          "parkingCountPerHousehold": 0.7,
+          "isParkingPossible": true
+        },
+        "articleDetailInfo": {
+          "articleNumber": "2633517638",
+          "articleName": "건영2차",
+          "articleFeatureDescription": "31 올수리, 중계역초역세권, 초중고학군우수, 개별난방, 입주협의.",
+          "articleDescription": "★★안녕하세요! 노원역 키움부동산입니다.\\n★★31 올수리, 중계역초역세권, 초중고학군우수, 개별난방, 입주협의.\\n★★방문 전화상담환영.\\n★★아파트물건 다량 확보중, 사정상광고 올리지못한 물건 다량확보중.\\n★★365일 무휴 궁금하실 때 언제든지 전화 주세요!\\n★★전자계약가능 친절하고 정성껏 공인중개사 14년 경력 \\n★★문의사항 있는 경우 전화 / 톡톡 / 방문으로 연락주세요.\\n★★방문시 401동 지하상가주차장 주차하시고 올라오시면 됩니다.\\n★★아파트주공1~16단지 매매, 전월세 및 재개발 전문(키움부동산)\\n\\n★★네이버 검색 - “노원역키움부동산 검색‘ 블로그 상계주공 재건축정보 및 네이버 물건 \\n    일괄 확인가능\\n\\n★★연락 주시면 최선을 다해 최고의, 최적의 물건을 찾아드립니다.\\n★★부담 없이 전화 주세요.\\n★★좋은 인연으로 모시겠습니다. 잠깐! 이것도 인연인데 3초만, 생각해보세요!\\n\\n★★감사합니다. \\n\\n****** 키움 공인중개사사무소 02-933-8885 ******",
+          "isAddressExposed": true,
+          "isDirectTrade": false,
+          "isSafeLessorOfHug": false,
+          "cpId": "asil",
+          "exposureStartDate": "2026-06-22",
+          "coordinates": {
+            "xCoordinate": 127.06646,
+            "yCoordinate": 37.64672
+          }
+        },
+        "movingInInfo": {
+          "movingInNegotiation": true,
+          "movingInType": "MV001"
+        },
+        "verificationInfo": {
+          "verificationType": "DOC",
+          "isAssociationArticle": false,
+          "exposureStartDate": "2026-06-22",
+          "articleConfirmDate": "2026-06-22"
+        },
+        "spaceInfo": {
+          "floorInfo": {
+            "targetFloor": "1",
+            "totalFloor": "15",
+            "groundTotalFloor": "-",
+            "undergroundTotalFloor": "-",
+            "floorType": "10",
+            "residenceType": "1"
+          },
+          "roomCount": 3,
+          "bathRoomCount": 2,
+          "direction": "ES",
+          "duplex": false,
+          "directionStandard": "거실 기준"
+        },
+        "sizeInfo": {
+          "supplySpace": 104.66,
+          "exclusiveSpace": 84.96,
+          "supplySpaceName": "104",
+          "exclusiveSpaceName": "84",
+          "pyeongArea": 31.65
+        }
+      },
+      "communalComplexInfo": {
+        "complexNumber": 228,
+        "complexName": "건영2차",
+        "pyeongTypeNumber": 2,
+        "dongName": "103"
+      }
+    },
+    "complex": {
+      "name": "건영2차",
+      "type": "A04",
+      "address": {
+        "legalDivisionNumber": "1135010600",
+        "legalDivisionLevel": "EUP",
+        "city": "서울시",
+        "division": "노원구",
+        "sector": "중계동",
+        "jibun": "515-2",
+        "roadName": "덕릉로 517",
+        "zipCode": "01760"
+      },
+      "coordinates": {
+        "xCoordinate": 127.065831,
+        "yCoordinate": 37.646732
+      },
+      "totalHouseholdNumber": 742,
+      "leaseHouseholdNumber": 0,
+      "dongCount": 6,
+      "hasBuildingHoInfo": true,
+      "constructionCompany": "(주)건영종합건설",
+      "buildingUse": "공동주택",
+      "isServicedResidence": false,
+      "buildingRatioInfo": {
+        "floorAreaRatio": 242,
+        "buildingCoverageRatio": 18
+      },
+      "useApprovalDate": "19910110",
+      "approvalElapsedYear": 36,
+      "parkingInfo": {
+        "totalParkingCount": 520,
+        "parkingCountPerHousehold": 0.7
+      },
+      "heatingAndCoolingInfo": {
+        "heatingAndCoolingSystemType": "HT005",
+        "heatingEnergyType": "HF002"
+      },
+      "managementOfficeContact": "02-971-2421",
+      "monopolyRestrictionType": "N",
+      "isRestrictedTransferOfReconstructionAssociationMembership": false,
+      "isComplexTourExist": false,
+      "highestDongFloor": 15,
+      "lowestDongFloor": 14
+    },
+    "extras": {
+      "roomCount": 3,
+      "bathRoomCount": 2,
+      "pyeongArea": 31.65,
+      "supplySpaceName": "104",
+      "exclusiveSpaceName": "84",
+      "articleFeatureDescription": "31 올수리, 중계역초역세권, 초중고학군우수, 개별난방, 입주협의.",
+      "articleDescription": "★★안녕하세요! 노원역 키움부동산입니다.\\n★★31 올수리, 중계역초역세권, 초중고학군우수, 개별난방, 입주협의.\\n★★방문 전화상담환영.\\n★★아파트물건 다량 확보중, 사정상광고 올리지못한 물건 다량확보중.\\n★★365일 무휴 궁금하실 때 언제든지 전화 주세요!\\n★★전자계약가능 친절하고 정성껏 공인중개사 14년 경력 \\n★★문의사항 있는 경우 전화 / 톡톡 / 방문으로 연락주세요.\\n★★방문시 401동 지하상가주차장 주차하시고 올라오시면 됩니다.\\n★★아파트주공1~16단지 매매, 전월세 및 재개발 전문(키움부동산)\\n\\n★★네이버 검색 - “노원역키움부동산 검색‘ 블로그 상계주공 재건축정보 및 네이버 물건 \\n    일괄 확인가능\\n\\n★★연락 주시면 최선을 다해 최고의, 최적의 물건을 찾아드립니다.\\n★★부담 없이 전화 주세요.\\n★★좋은 인연으로 모시겠습니다. 잠깐! 이것도 인연인데 3초만, 생각해보세요!\\n\\n★★감사합니다. \\n\\n****** 키움 공인중개사사무소 02-933-8885 ******",
+      "movingInInfo": {
+        "movingInNegotiation": true,
+        "movingInType": "MV001"
+      },
+      "verificationInfo": {
+        "verificationType": "DOC",
+        "isAssociationArticle": false,
+        "exposureStartDate": "2026-06-22",
+        "articleConfirmDate": "2026-06-22"
+      },
+      "facilityInfo": {
+        "life": [],
+        "security": [],
+        "etc": [],
+        "aircon": [],
+        "entranceType": "10",
+        "totalParkingCount": 520,
+        "parkingCountPerHousehold": 0.7,
+        "isParkingPossible": true
+      },
+      "zipCode": "01760",
+      "legalDivisionNumber": "1135010600",
+      "totalHouseholdNumber": 742,
+      "dongCount": 6,
+      "constructionCompany": "(주)건영종합건설",
+      "buildingUse": "공동주택",
+      "useApprovalDate": "19910110",
+      "approvalElapsedYear": 36,
+      "parkingInfo": {
+        "totalParkingCount": 520,
+        "parkingCountPerHousehold": 0.7
+      },
+      "heatingAndCoolingInfo": {
+        "heatingAndCoolingSystemType": "HT005",
+        "heatingEnergyType": "HF002"
+      },
+      "managementOfficeContact": "02-971-2421",
+      "buildingRatioInfo": {
+        "floorAreaRatio": 242,
+        "buildingCoverageRatio": 18
+      },
+      "isDirectTrade": false,
+      "isArticleImageExist": false,
+      "cpId": "asil",
+      "redevelopmentLabel": "재건축",
+      "redevelopmentType": "RECONSTRUCTION",
+      "communalComplexInfo": {
+        "complexNumber": 228,
+        "complexName": "건영2차",
+        "pyeongTypeNumber": 2,
+        "dongName": "103"
+      }
+    }
+  }
+}

@@ -1,0 +1,415 @@
+@import "tailwindcss";
+
+:root {
+  font-family: "Pretendard", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #111827;
+  background-color: #f2f4f7;
+  --ui-brand: #10b981;
+  --ui-brand-strong: #059669;
+  --ui-border: #e2e8f0;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background: #f2f4f7;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+button,
+a {
+  cursor: pointer;
+}
+
+@layer components {
+  .toss-card {
+    @apply rounded-2xl border border-slate-200/80 bg-white p-4 transition-all;
+  }
+
+  .toss-input {
+    @apply h-11 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 text-[14px] text-slate-900 outline-none transition focus:border-emerald-300 focus:bg-white;
+  }
+
+  .toss-textarea {
+    @apply w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-[14px] text-slate-900 outline-none transition focus:border-emerald-300 focus:bg-white;
+  }
+
+  .toss-button-primary {
+    @apply inline-flex h-11 items-center justify-center rounded-2xl bg-emerald-500 px-4 text-[14px] text-white transition hover:bg-emerald-600 active:opacity-80;
+  }
+
+  .toss-button-surface {
+    @apply inline-flex h-11 items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 text-[14px] text-slate-700 transition hover:bg-slate-50 active:bg-slate-100;
+  }
+
+  .toss-chip {
+    @apply inline-flex items-center rounded-full bg-slate-100 px-3 py-1.5 text-[12px] text-slate-600;
+  }
+
+  .ui-button-ghost {
+    @apply rounded-2xl bg-transparent text-slate-600 hover:bg-slate-100 active:bg-slate-100;
+  }
+
+  .ui-button-danger {
+    @apply rounded-2xl border border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100 active:bg-rose-100;
+  }
+
+  .ui-selector-field {
+    @apply flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-left transition hover:bg-slate-50 active:bg-slate-100;
+  }
+
+  .ui-sheet-backdrop {
+    @apply bg-black/25;
+  }
+
+  .ui-sheet-root {
+    left: 0;
+    right: 0;
+    max-width: 36rem;
+    margin-inline: auto;
+  }
+
+  .ui-sheet-container {
+    left: 12px !important;
+    right: 12px !important;
+    width: auto !important;
+    max-width: none;
+    border-radius: 1.5rem 1.5rem 0 0;
+    border: 0.5px solid rgb(226 232 240 / 0.9);
+    background: #fff;
+    box-shadow:
+      0 -8px 32px rgb(15 23 42 / 0.12),
+      0 -1px 2px rgb(15 23 42 / 0.06);
+  }
+
+  .ui-sheet-header {
+    @apply py-2;
+  }
+
+  .ui-sheet-content {
+    min-height: 0;
+  }
+
+  .ui-sheet-content-scroller {
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 32px);
+  }
+
+  .property-location-map {
+    position: relative;
+    z-index: 0;
+    isolation: isolate;
+  }
+
+  .property-location-map .leaflet-container {
+    font-family: inherit;
+    z-index: 0 !important;
+  }
+
+  .property-location-map .leaflet-pane,
+  .property-location-map .leaflet-top,
+  .property-location-map .leaflet-bottom {
+    z-index: 1 !important;
+  }
+
+  .property-location-map .leaflet-control-attribution {
+    margin: 0;
+    padding: 2px 6px;
+    font-size: 9px;
+    line-height: 1.2;
+    background: rgb(255 255 255 / 0.88);
+  }
+
+  .property-map-marker {
+    background: transparent;
+    border: 0;
+  }
+
+  .property-map-marker-dot {
+    display: block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid #fff;
+    border-radius: 9999px;
+    background: #e11d48;
+    box-shadow: 0 1px 4px rgb(15 23 42 / 0.28);
+  }
+
+  .property-map-marker-dot-active {
+    width: 16px;
+    height: 16px;
+    background: #0ea5e9;
+  }
+
+  .property-map-price-marker-wrap {
+    background: transparent;
+    border: 0;
+  }
+
+  .property-map-price-marker {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 92px;
+  }
+
+  .property-map-price-marker-card {
+    overflow: hidden;
+    width: 100%;
+    border-radius: 8px;
+    border: 1px solid rgb(15 23 42 / 0.12);
+    background: #fff;
+    box-shadow: 0 4px 14px rgb(15 23 42 / 0.16);
+  }
+
+  .property-map-price-marker--selected .property-map-price-marker-card {
+    border-color: #0ea5e9;
+    box-shadow:
+      0 0 0 2px rgb(14 165 233 / 0.28),
+      0 6px 18px rgb(14 165 233 / 0.22);
+  }
+
+  .property-map-price-marker-header {
+    background: #1e293b;
+    padding: 4px 8px;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: #fff;
+  }
+
+  .property-map-price-marker-body {
+    padding: 5px 8px 6px;
+  }
+
+  .property-map-price-marker-row {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.35;
+    color: #0f172a;
+  }
+
+  .property-map-price-marker-row + .property-map-price-marker-row {
+    margin-top: 2px;
+  }
+
+  .property-map-price-marker-row-actual {
+    color: #059669;
+  }
+
+  .property-map-price-marker-label {
+    flex-shrink: 0;
+    font-size: 10px;
+    font-weight: 800;
+  }
+
+  .property-map-price-marker-value {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .property-map-price-marker-pin {
+    width: 10px;
+    height: 10px;
+    margin-top: -1px;
+    border: 2px solid #fff;
+    border-radius: 9999px;
+    background: #64748b;
+    box-shadow: 0 1px 3px rgb(15 23 42 / 0.24);
+  }
+
+  .property-map-price-marker--selected .property-map-price-marker-pin {
+    background: #0ea5e9;
+  }
+
+  .property-map-cluster-wrap {
+    background: transparent !important;
+    border: 0 !important;
+  }
+
+  .property-map-cluster {
+    display: flex;
+    height: 48px;
+    width: 48px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    border: 1px solid rgb(255 255 255 / 0.85);
+    background: rgb(134 239 172 / 0.72);
+    box-shadow: 0 4px 14px rgb(22 163 74 / 0.18);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .property-map-cluster span {
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1;
+    color: #0f172a;
+  }
+
+  .property-map-stats-bar-inner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-radius: 9999px;
+    border: 1.5px solid #22c55e;
+    background: rgb(255 255 255 / 0.96);
+    padding: 8px 18px;
+    box-shadow: 0 4px 16px rgb(15 23 42 / 0.12);
+  }
+
+  .property-map-stats-item {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    margin: 0;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1;
+    color: #0f172a;
+  }
+
+  .property-map-stats-value {
+    font-size: 14px;
+    font-weight: 800;
+    color: #16a34a;
+  }
+
+  .property-map-stats-divider {
+    width: 1px;
+    height: 14px;
+    background: rgb(148 163 184 / 0.55);
+  }
+
+  .property-map-controls {
+    pointer-events: none;
+  }
+
+  .property-map-glass-surface {
+    background: rgb(255 255 255 / 0.58);
+    border: 0.5px solid rgb(255 255 255 / 0.72);
+    box-shadow:
+      0 1px 2px rgb(15 23 42 / 0.06),
+      0 8px 24px rgb(15 23 42 / 0.08);
+    backdrop-filter: blur(22px) saturate(165%);
+    -webkit-backdrop-filter: blur(22px) saturate(165%);
+  }
+
+  .property-map-glass-pill {
+    overflow: hidden;
+    border-radius: 18px;
+    background: rgb(255 255 255 / 0.58);
+    border: 0.5px solid rgb(255 255 255 / 0.72);
+    box-shadow:
+      0 1px 2px rgb(15 23 42 / 0.06),
+      0 8px 24px rgb(15 23 42 / 0.08);
+    backdrop-filter: blur(22px) saturate(165%);
+    -webkit-backdrop-filter: blur(22px) saturate(165%);
+  }
+
+  .property-map-glass-circle {
+    display: flex;
+    height: 2.75rem;
+    width: 2.75rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    background: rgb(255 255 255 / 0.58);
+    border: 0.5px solid rgb(255 255 255 / 0.72);
+    box-shadow:
+      0 1px 2px rgb(15 23 42 / 0.06),
+      0 8px 24px rgb(15 23 42 / 0.08);
+    backdrop-filter: blur(22px) saturate(165%);
+    -webkit-backdrop-filter: blur(22px) saturate(165%);
+  }
+
+  .property-map-glass-btn {
+    display: flex;
+    height: 2.75rem;
+    width: 2.75rem;
+    align-items: center;
+    justify-content: center;
+    color: #2c2c2e;
+    transition: background-color 150ms ease;
+  }
+
+  .property-map-glass-btn:active {
+    background: rgb(0 0 0 / 0.06);
+  }
+
+  .property-map-glass-btn-active {
+    background: rgb(0 0 0 / 0.08);
+    color: #007aff;
+  }
+
+  .property-map-glass-divider {
+    height: 0.5px;
+    margin-inline: 8px;
+    background: rgb(60 60 67 / 0.18);
+  }
+
+  .property-map-top-bar {
+    border-radius: 20px;
+    padding: 0.5rem;
+    background: rgb(255 255 255 / 0.88);
+    border: 0.5px solid rgb(255 255 255 / 0.92);
+    box-shadow:
+      0 1px 3px rgb(15 23 42 / 0.1),
+      0 8px 24px rgb(15 23 42 / 0.12);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+  }
+
+  .property-map-top-bar .ui-selector-field {
+    background: rgb(255 255 255 / 0.78);
+    border-color: rgb(255 255 255 / 0.9);
+  }
+
+  .property-map-top-bar .toss-button-surface {
+    background: rgb(255 255 255 / 0.78);
+    border-color: rgb(255 255 255 / 0.9);
+  }
+
+  .property-map-hint {
+    border-radius: 9999px;
+    padding: 0.375rem 0.875rem;
+    font-size: 12px;
+    font-weight: 500;
+    color: #3a3a3c;
+    background: rgb(255 255 255 / 0.58);
+    border: 0.5px solid rgb(255 255 255 / 0.72);
+    box-shadow:
+      0 1px 2px rgb(15 23 42 / 0.06),
+      0 8px 24px rgb(15 23 42 / 0.08);
+    backdrop-filter: blur(22px) saturate(165%);
+    -webkit-backdrop-filter: blur(22px) saturate(165%);
+  }
+
+  .property-map-control-btn {
+    @apply flex h-10 w-10 items-center justify-center rounded-xl text-slate-700 transition hover:bg-slate-50 active:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-45;
+  }
+
+  .property-map-user-location {
+    background: transparent;
+    border: 0;
+  }
+
+  .property-map-user-location-dot {
+    display: block;
+    width: 16px;
+    height: 16px;
+    border: 3px solid #fff;
+    border-radius: 9999px;
+    background: #2563eb;
+    box-shadow: 0 0 0 4px rgb(37 99 235 / 0.25);
+  }
+}
