@@ -49,7 +49,7 @@ export function CrawlStatusBanner({ property, onRetry, isRetrying = false }: Cra
             ) : null}
             <p
               className={cn(
-                "text-[13px] font-semibold",
+                "text-ui-body font-semibold",
                 status === "failed" && "text-rose-700",
                 status === "pending" && "text-slate-700",
                 status === "processing" && "text-blue-700",
@@ -58,7 +58,7 @@ export function CrawlStatusBanner({ property, onRetry, isRetrying = false }: Cra
               {label}
             </p>
           </div>
-          <p className="mt-1 text-[12px] leading-relaxed text-slate-600">{description}</p>
+          <p className="mt-1 text-ui-caption leading-relaxed text-slate-600">{description}</p>
         </div>
 
         {status === "failed" && onRetry ? (

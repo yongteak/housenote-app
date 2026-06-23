@@ -72,15 +72,15 @@ function QueueRow({
     <>
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-1.5">
-          <p className="truncate text-[14px] font-semibold text-slate-900">{title}</p>
+          <p className="truncate text-ui-emphasis font-semibold text-slate-900">{title}</p>
           <CrawlStatusBadge property={record} />
         </div>
-        <p className="mt-0.5 truncate text-[12px] text-slate-500">{record.source_url}</p>
-        <p className="mt-1 text-[11px] text-slate-400">
+        <p className="mt-0.5 truncate text-ui-caption text-slate-500">{record.source_url}</p>
+        <p className="mt-1 text-ui-caption text-slate-400">
           {getCrawlStatusLabel(status)} · {formatDate(queuedAt ?? record.created_at)}
         </p>
         {status === "failed" && record.metadata && typeof record.metadata === "object" && "crawl" in record.metadata ? (
-          <p className="mt-1 text-[11px] text-rose-500">
+          <p className="mt-1 text-ui-caption text-rose-500">
             {(record.metadata.crawl as { errorMessage?: string })?.errorMessage ?? "처리 실패"}
           </p>
         ) : null}
@@ -91,7 +91,7 @@ function QueueRow({
             type="button"
             variant="surface"
             size="sm"
-            className="h-8 border-slate-200 px-2 text-[12px]"
+            className="border-slate-200 px-3"
             disabled={isRetrying}
             onClick={(event) => {
               event.preventDefault();
@@ -108,7 +108,7 @@ function QueueRow({
             variant="ghost"
             size="icon"
             aria-label="삭제"
-            className="h-8 w-8 text-slate-400 hover:text-rose-500"
+            className="text-slate-400 hover:text-rose-500"
             disabled={isDeleting}
             onClick={(event) => {
               event.preventDefault();
@@ -126,7 +126,7 @@ function QueueRow({
   return (
     <Link
       to={`/properties/${record.id}`}
-      className="flex items-center gap-3 py-3.5 transition active:bg-slate-50/50"
+      className="flex min-h-11 items-center gap-3 py-3.5 ui-list-row"
     >
       {content}
     </Link>
@@ -154,9 +154,9 @@ function QueueSection({
 
   return (
     <section>
-      <p className="mb-1 px-1 text-[12px] font-semibold text-slate-500">{title}</p>
+      <p className="mb-1 px-1 text-ui-caption font-semibold text-slate-500">{title}</p>
       {items.length === 0 ? (
-        <p className="px-1 py-2 text-[12px] text-slate-400">{emptyText}</p>
+        <p className="px-1 py-2 text-ui-caption text-slate-400">{emptyText}</p>
       ) : (
         <div className="divide-y divide-slate-100 border-t border-slate-100">
           {items.map((record) => (
@@ -203,8 +203,8 @@ export function CrawlQueuePanel({ actor }: CrawlQueuePanelProps) {
   if (!hasAny && !queueQuery.isLoading) {
     return (
       <section className="border-t border-slate-100 pt-6">
-        <p className="px-1 text-[12px] font-semibold text-slate-500">저장한 링크</p>
-        <p className="mt-2 px-1 text-[12px] text-slate-400">아직 저장한 링크가 없어요.</p>
+        <p className="px-1 text-ui-caption font-semibold text-slate-500">저장한 링크</p>
+        <p className="mt-2 px-1 text-ui-caption text-slate-400">아직 저장한 링크가 없어요.</p>
       </section>
     );
   }
@@ -212,8 +212,8 @@ export function CrawlQueuePanel({ actor }: CrawlQueuePanelProps) {
   return (
     <section className={cn("space-y-5 border-t border-slate-100 pt-6")}>
       <div className="px-1">
-        <p className="text-[12px] font-semibold text-slate-500">저장한 링크</p>
-        <p className="mt-0.5 text-[11px] text-slate-400">PC에서 정보를 가져온 뒤 목록에 표시돼요.</p>
+        <p className="text-ui-caption font-semibold text-slate-500">저장한 링크</p>
+        <p className="mt-0.5 text-ui-caption text-slate-400">PC에서 정보를 가져온 뒤 목록에 표시돼요.</p>
       </div>
 
       <QueueSection

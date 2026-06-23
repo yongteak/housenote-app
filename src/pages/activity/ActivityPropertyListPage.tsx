@@ -5,6 +5,7 @@ import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
 import { PropertyRatingSummary } from "../../components/PropertyRatingSummary";
 import { CrawlStatusBadge } from "../../components/property/CrawlStatusBadge";
 import { FavoriteButton } from "../../components/property/FavoriteButton";
+import { PropertyListThumbnail } from "../../components/property/PropertyListThumbnail";
 import { Button } from "../../components/ui/Button";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { NavBar } from "../../components/ui/NavBar";
@@ -150,39 +151,31 @@ export function ActivityPropertyListPage({
               <div key={row.id} className="relative flex gap-2 py-4">
                 <Link
                   to={`/properties/${row.property.id}`}
-                  className="flex min-w-0 flex-1 gap-4 transition active:opacity-80"
+                  className="flex min-w-0 flex-1 gap-4 transition active:opacity-80 active:scale-[0.99]"
                 >
-                  <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-slate-100 bg-slate-50">
-                    {row.property.thumbnail_url ? (
-                      <img
-                        src={row.property.thumbnail_url}
-                        alt={row.property.title ?? "매물 이미지"}
-                        className="h-full w-full object-cover"
-                      />
-                    ) : null}
-                  </div>
-                  <div className="min-w-0 flex-1 flex flex-col justify-between py-0.5">
+                  <PropertyListThumbnail property={row.property} />
+                  <div className="min-w-0 flex-1 flex flex-col gap-1 py-0.5">
                     <div className="flex items-start justify-between gap-3">
-                      <p className="min-w-0 truncate text-[15px] font-bold text-slate-950">
+                      <p className="min-w-0 truncate text-ui-emphasis font-bold text-slate-950">
                         {row.property.title ?? "제목 없음"}
                       </p>
                       <PriceDisplay
                         value={row.property.current_price_value}
                         size="sm"
-                        className="shrink-0 text-emerald-600"
+                        className="shrink-0 min-h-0 py-0 text-emerald-600"
                         stopPropagation
                       />
                     </div>
-                    <p className="mt-1 truncate text-[12px] text-slate-500">{row.property.address ?? "-"}</p>
-                    <p className="mt-1 text-[12px] font-medium text-slate-500">{row.meta}</p>
+                    <p className="truncate text-ui-caption text-slate-500">{row.property.address ?? "-"}</p>
+                    <p className="text-ui-caption font-medium text-slate-500">{row.meta}</p>
                     {row.badge ? (
-                      <p className="mt-0.5 truncate text-[11px] text-slate-400">{row.badge}</p>
+                      <p className="truncate text-ui-caption text-slate-400">{row.badge}</p>
                     ) : null}
-                    <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+                    <div className="mt-1 flex flex-wrap items-center gap-1.5">
                       <CrawlStatusBadge property={row.property} />
                       <span
                         className={cn(
-                          "inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-medium",
+                          "ui-badge",
                           row.property.visited ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-500",
                         )}
                       >
@@ -190,7 +183,7 @@ export function ActivityPropertyListPage({
                       </span>
                       <span
                         className={cn(
-                          "inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-medium",
+                          "ui-badge",
                           row.property.decision_status === "revisit" && "bg-amber-50 text-amber-700",
                           row.property.decision_status === "review" && "bg-blue-50 text-blue-700",
                           row.property.decision_status === "hold" && "bg-slate-100 text-slate-600",

@@ -10,6 +10,8 @@ import { ActorAvatar } from "../../components/actor/ActorAvatar";
 import { PriceDisplay } from "../../components/PriceDisplay";
 import { CrawlStatusBadge } from "../../components/property/CrawlStatusBadge";
 import { FavoriteButton } from "../../components/property/FavoriteButton";
+import { PropertyListThumbnail } from "../../components/property/PropertyListThumbnail";
+import { Button } from "../../components/ui/Button";
 import { BottomSheet } from "../../components/ui/BottomSheet";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { MapFilterStatsBar } from "./MapFilterStatsBar";
@@ -115,7 +117,7 @@ function MapPropertyGroupSwitcher({ properties, selectedId, onSelect }: MapPrope
 
   return (
     <div className="px-4 pb-3">
-      <p className="mb-2 text-[11px] font-semibold text-slate-500">같은 위치 매물 {properties.length}건</p>
+      <p className="mb-2 text-ui-caption font-semibold text-slate-500">같은 위치 매물 {properties.length}건</p>
       <div className="flex gap-2 overflow-x-auto pb-0.5">
         {properties.map((property) => {
           const selected = property.id === selectedId;
@@ -125,8 +127,10 @@ function MapPropertyGroupSwitcher({ properties, selectedId, onSelect }: MapPrope
               type="button"
               onClick={() => onSelect(property.id)}
               className={cn(
-                "shrink-0 cursor-pointer rounded-full border px-3 py-1.5 text-[12px] font-semibold transition",
-                selected ? "border-sky-500 bg-sky-50 text-sky-700" : "border-slate-200 bg-white text-slate-700",
+                "shrink-0 cursor-pointer rounded-full border px-4 py-2.5 text-ui-body font-semibold transition active:scale-[0.98]",
+                selected
+                  ? "border-sky-500 bg-sky-50 text-sky-700 ring-2 ring-sky-200/70"
+                  : "border-slate-200 bg-white text-slate-700 active:bg-slate-50",
               )}
             >
               {formatPyeong(property.area_supply_m2)} · {formatPriceManwon(property.current_price_value)}
@@ -146,26 +150,17 @@ function formatArea(property: PropertyRecord): string {
 type PropertyMapSheetHeaderActionsProps = {
   propertyId: string;
   sourceUrl: string;
-  onOpenDetail: () => void;
 };
 
-function PropertyMapSheetHeaderActions({ propertyId, sourceUrl, onOpenDetail }: PropertyMapSheetHeaderActionsProps) {
+function PropertyMapSheetHeaderActions({ propertyId, sourceUrl }: PropertyMapSheetHeaderActionsProps) {
   return (
     <div className="flex items-center gap-1">
       <FavoriteButton propertyId={propertyId} size="sm" />
-      <button
-        type="button"
-        className="inline-flex cursor-pointer items-center gap-1 text-[13px] font-medium text-emerald-600 transition hover:text-emerald-700 active:opacity-70"
-        onClick={onOpenDetail}
-      >
-        <FileText className="h-3.5 w-3.5" strokeWidth={2.25} />
-        <span>상세</span>
-      </button>
       <a
         href={sourceUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex cursor-pointer items-center gap-1 text-[13px] font-medium text-slate-500 transition hover:text-slate-700 active:opacity-70"
+        className="ui-link-btn gap-1 px-2 text-slate-500 hover:text-slate-700"
       >
         <ExternalLink className="h-3.5 w-3.5" strokeWidth={2.25} />
         <span>원본</span>
@@ -182,8 +177,8 @@ type DetailRowProps = {
 function DetailRow({ label, value }: DetailRowProps) {
   return (
     <div className="flex items-start justify-between gap-3 py-2">
-      <span className="shrink-0 text-[12px] text-slate-500">{label}</span>
-      <span className="text-right text-[13px] font-semibold text-slate-900">{value}</span>
+      <span className="shrink-0 text-ui-caption text-slate-500">{label}</span>
+      <span className="text-right text-ui-body font-semibold text-slate-900">{value}</span>
     </div>
   );
 }
@@ -197,31 +192,23 @@ function PropertyMapDetail({ property, onOpenDetail }: PropertyMapDetailProps) {
   const ratingAvg = getPropertyAverageRating(property);
 
   return (
-    <div className="space-y-4 px-4 pb-6 pt-1">
+    <div className="space-y-4 px-4 pb-[calc(env(safe-area-inset-bottom,0px)+16px)] pt-1">
       <div className="flex gap-3">
-        <div className="h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-slate-100 bg-slate-100">
-          {property.thumbnail_url ? (
-            <img src={property.thumbnail_url} alt={property.title ?? "매물"} className="h-full w-full object-cover" />
-          ) : null}
-        </div>
+        <PropertyListThumbnail property={property} className="h-20 w-20 text-[26px]" />
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-3">
-            <p className="text-[16px] font-bold leading-snug text-slate-950 flex-1">{property.title ?? "제목 없음"}</p>
+            <p className="text-ui-emphasis font-bold leading-snug text-slate-950 flex-1">{property.title ?? "제목 없음"}</p>
             <div className="shrink-0 pt-0.5">
-              <PropertyMapSheetHeaderActions
-                propertyId={property.id}
-                sourceUrl={property.source_url}
-                onOpenDetail={onOpenDetail}
-              />
+              <PropertyMapSheetHeaderActions propertyId={property.id} sourceUrl={property.source_url} />
             </div>
           </div>
-          <p className="mt-1.5 text-[12px] leading-relaxed text-slate-500">{property.address ?? "-"}</p>
+          <p className="mt-1.5 text-ui-caption leading-relaxed text-slate-500">{property.address ?? "-"}</p>
           <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
             <CrawlStatusBadge property={property} />
-            <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-normal text-slate-600">
+            <span className="rounded-md bg-slate-100 px-2 py-0.5 text-ui-caption font-normal text-slate-600">
               {property.property_type ?? "매물"}
             </span>
-            <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-normal text-slate-600">
+            <span className="rounded-md bg-slate-100 px-2 py-0.5 text-ui-caption font-normal text-slate-600">
               {property.deal_type ?? "-"}
             </span>
             <PropertyRatingSummary property={property} compact />
@@ -231,7 +218,7 @@ function PropertyMapDetail({ property, onOpenDetail }: PropertyMapDetailProps) {
 
       <div className="rounded-xl border border-slate-100 bg-slate-50 px-3.5 py-2.5">
         <div className="flex items-center justify-between">
-          <span className="text-[12px] font-medium text-slate-500">등록가</span>
+          <span className="text-ui-caption font-medium text-slate-500">등록가</span>
           <PriceDisplay value={property.current_price_value} size="md" className="text-slate-950" />
         </div>
       </div>
@@ -258,10 +245,20 @@ function PropertyMapDetail({ property, onOpenDetail }: PropertyMapDetailProps) {
 
       {property.memo ? (
         <div className="rounded-xl border border-slate-100 bg-white px-3 py-2.5">
-          <p className="text-[12px] font-semibold text-slate-500">메모</p>
-          <p className="mt-1 text-[13px] leading-relaxed text-slate-700">{property.memo}</p>
+          <p className="text-ui-caption font-semibold text-slate-500">메모</p>
+          <p className="mt-1 text-ui-body leading-relaxed text-slate-700">{property.memo}</p>
         </div>
       ) : null}
+
+      <Button
+        type="button"
+        variant="primary"
+        className="w-full"
+        leadingIcon={<FileText className="h-4 w-4" strokeWidth={2.25} />}
+        onClick={onOpenDetail}
+      >
+        상세보기
+      </Button>
     </div>
   );
 }

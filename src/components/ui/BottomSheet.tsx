@@ -117,11 +117,11 @@ export function BottomSheet({
               <header className="ui-sheet-header shrink-0 border-b border-slate-100/80">
                 <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 px-3 py-2.5">
                   <div className="flex min-w-0 items-center justify-start gap-2">{headerLeading}</div>
-                  <p className="max-w-[44vw] truncate text-center text-[15px] font-semibold text-slate-900">{title}</p>
+                  <p className="max-w-[44vw] truncate text-center text-ui-nav font-semibold text-slate-900">{title}</p>
                   <div className="flex justify-end">
                     <button
                       type="button"
-                      className="cursor-pointer text-[15px] font-medium text-slate-500 transition hover:text-slate-800 active:opacity-60"
+                      className="ui-link-btn min-h-11 px-3 text-ui-body font-medium text-slate-500 hover:text-slate-800"
                       onClick={onClose}
                     >
                       {closeLabel}

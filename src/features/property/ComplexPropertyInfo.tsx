@@ -76,21 +76,21 @@ function TradeOrListingRow({ trade }: { trade: ComplexRecentRealTrade }) {
   return (
     <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-3 border-b border-slate-100 py-3 last:border-b-0">
       <div className="min-w-0">
-        <p className="text-[13px] font-semibold text-slate-900">
+        <p className="text-ui-body font-semibold text-slate-900">
           {trade.tradeDate ?? "등록 매물"}
           {trade.floor ? ` · ${trade.floor}` : null}
           {trade.pyeongArea != null ? ` · ${Math.round(trade.pyeongArea)}평` : null}
           {trade.areaSupplyM2 != null ? ` · ${trade.areaSupplyM2}㎡` : null}
         </p>
         {trade.dealType ? (
-          <p className="mt-0.5 text-[11px] font-medium text-slate-400">{trade.dealType}</p>
+          <p className="mt-0.5 text-ui-caption font-medium text-slate-400">{trade.dealType}</p>
         ) : null}
       </div>
       <div className="text-right">
         {trade.priceValue != null ? (
           <PriceDisplay value={trade.priceValue} size="sm" className="text-emerald-600" />
         ) : (
-          <span className="text-[13px] font-semibold text-slate-800">{trade.priceText ?? "-"}</span>
+          <span className="text-ui-body font-semibold text-slate-800">{trade.priceText ?? "-"}</span>
         )}
       </div>
     </div>
@@ -121,36 +121,36 @@ export function ComplexPropertyInfo({ crawl }: ComplexPropertyInfoProps) {
     <div className="space-y-3">
       {listingSummary ? (
         <article className="toss-card border-slate-200 p-4">
-          <p className="text-[11px] font-medium text-slate-400">등록 매물 수</p>
-          <p className="mt-0.5 text-[14px] font-semibold text-slate-900">{listingSummary}</p>
+          <p className="text-ui-caption font-medium text-slate-400">등록 매물 수</p>
+          <p className="mt-0.5 text-ui-emphasis font-semibold text-slate-900">{listingSummary}</p>
         </article>
       ) : null}
 
       <article className="toss-card divide-y divide-slate-100 overflow-hidden border-slate-200 p-0">
         <div className="grid grid-cols-2 gap-x-4 gap-y-3 p-4">
           <div>
-            <p className="text-[11px] font-medium text-slate-400">단지명</p>
-            <p className="mt-0.5 text-[13px] font-semibold text-slate-900">{display(snapshot?.name ?? crawl.title)}</p>
+            <p className="text-ui-caption font-medium text-slate-400">단지명</p>
+            <p className="mt-0.5 text-ui-body font-semibold text-slate-900">{display(snapshot?.name ?? crawl.title)}</p>
           </div>
           <div>
-            <p className="text-[11px] font-medium text-slate-400">단지번호</p>
-            <p className="mt-0.5 text-[13px] font-semibold text-slate-900">{display(crawl.source_listing_id)}</p>
+            <p className="text-ui-caption font-medium text-slate-400">단지번호</p>
+            <p className="mt-0.5 text-ui-body font-semibold text-slate-900">{display(crawl.source_listing_id)}</p>
           </div>
           <div>
-            <p className="text-[11px] font-medium text-slate-400">총 세대</p>
-            <p className="mt-0.5 text-[13px] font-semibold text-slate-900">
+            <p className="text-ui-caption font-medium text-slate-400">총 세대</p>
+            <p className="mt-0.5 text-ui-body font-semibold text-slate-900">
               {display(snapshot?.totalHouseholdNumber ?? extras?.totalHouseholdNumber)}
             </p>
           </div>
           <div>
-            <p className="text-[11px] font-medium text-slate-400">동 수</p>
-            <p className="mt-0.5 text-[13px] font-semibold text-slate-900">
+            <p className="text-ui-caption font-medium text-slate-400">동 수</p>
+            <p className="mt-0.5 text-ui-body font-semibold text-slate-900">
               {display(snapshot?.dongCount ?? extras?.dongCount)}
             </p>
           </div>
           <div>
-            <p className="text-[11px] font-medium text-slate-400">준공</p>
-            <p className="mt-0.5 text-[13px] font-semibold text-slate-900">
+            <p className="text-ui-caption font-medium text-slate-400">준공</p>
+            <p className="mt-0.5 text-ui-body font-semibold text-slate-900">
               {formatUseApprovalDate(
                 snapshot?.useApprovalDate ?? extras?.useApprovalDate ?? null,
                 snapshot?.approvalElapsedYear ?? extras?.approvalElapsedYear,
@@ -158,29 +158,29 @@ export function ComplexPropertyInfo({ crawl }: ComplexPropertyInfoProps) {
             </p>
           </div>
           <div>
-            <p className="text-[11px] font-medium text-slate-400">용적률·건폐율</p>
-            <p className="mt-0.5 text-[13px] font-semibold text-slate-900">
+            <p className="text-ui-caption font-medium text-slate-400">용적률·건폐율</p>
+            <p className="mt-0.5 text-ui-body font-semibold text-slate-900">
               {formatBuildingRatio(snapshot?.buildingRatioInfo ?? extras?.buildingRatioInfo ?? null)}
             </p>
           </div>
           <div>
-            <p className="text-[11px] font-medium text-slate-400">주차</p>
-            <p className="mt-0.5 text-[13px] font-semibold text-slate-900">
+            <p className="text-ui-caption font-medium text-slate-400">주차</p>
+            <p className="mt-0.5 text-ui-body font-semibold text-slate-900">
               {formatParking(snapshot?.parkingInfo ?? extras?.parkingInfo ?? null)}
             </p>
           </div>
           {snapshot?.layerFilter?.pyeongLabel ? (
             <div>
-              <p className="text-[11px] font-medium text-slate-400">공유 필터</p>
-              <p className="mt-0.5 text-[13px] font-semibold text-slate-900">
+              <p className="text-ui-caption font-medium text-slate-400">공유 필터</p>
+              <p className="mt-0.5 text-ui-body font-semibold text-slate-900">
                 {[snapshot.layerFilter.pyeongLabel, snapshot.layerFilter.dealTypeLabel].filter(Boolean).join(" · ")}
               </p>
             </div>
           ) : null}
           {snapshot?.constructionCompany ? (
             <div>
-              <p className="text-[11px] font-medium text-slate-400">시공사</p>
-              <p className="mt-0.5 text-[13px] font-semibold text-slate-900">{display(snapshot.constructionCompany)}</p>
+              <p className="text-ui-caption font-medium text-slate-400">시공사</p>
+              <p className="mt-0.5 text-ui-body font-semibold text-slate-900">{display(snapshot.constructionCompany)}</p>
             </div>
           ) : null}
         </div>
@@ -188,14 +188,14 @@ export function ComplexPropertyInfo({ crawl }: ComplexPropertyInfoProps) {
 
       <article className="toss-card overflow-hidden border-slate-200 p-0">
         <div className="border-b border-slate-100 px-4 py-3">
-          <p className="text-[13px] font-semibold text-slate-900">{tradeSectionTitle}</p>
+          <p className="text-ui-body font-semibold text-slate-900">{tradeSectionTitle}</p>
           {priceSource === "listing_min" && realTrades.length === 0 ? (
-            <p className="mt-0.5 text-[11px] text-slate-500">
+            <p className="mt-0.5 text-ui-caption text-slate-500">
               실거래 API 미제공 — 공유 필터(평형)에 맞는 등록 매물 최저가입니다.
             </p>
           ) : null}
           {fetchStatus === "rate_limited" && realTrades.length === 0 && listingPreviews.length === 0 ? (
-            <p className="mt-0.5 text-[11px] text-amber-600">{tradeEmptyMessage}</p>
+            <p className="mt-0.5 text-ui-caption text-amber-600">{tradeEmptyMessage}</p>
           ) : null}
         </div>
         {tradeRows.length > 0 ? (
@@ -205,7 +205,7 @@ export function ComplexPropertyInfo({ crawl }: ComplexPropertyInfoProps) {
             ))}
           </div>
         ) : (
-          <p className="px-4 py-4 text-[13px] text-slate-400">{tradeEmptyMessage}</p>
+          <p className="px-4 py-4 text-ui-body text-slate-400">{tradeEmptyMessage}</p>
         )}
       </article>
     </div>

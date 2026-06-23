@@ -106,7 +106,7 @@ export function LoginPage() {
                   >
                     <ActorAvatar variant={profile.variant} size="lg" className="h-24 w-24" label={profile.label} />
                   </div>
-                  <span className="text-[18px] font-bold text-slate-900">{profile.label}</span>
+                  <span className="text-ui-title font-bold text-slate-900">{profile.label}</span>
                 </button>
               );
             })}
@@ -114,7 +114,7 @@ export function LoginPage() {
 
           <div className="mt-5 space-y-3">
             {errorMessage ? (
-              <p className="text-center text-[13px] font-semibold text-rose-500">{errorMessage}</p>
+              <p className="text-center text-ui-body font-semibold text-rose-500">{errorMessage}</p>
             ) : null}
             <Button
               type="button"

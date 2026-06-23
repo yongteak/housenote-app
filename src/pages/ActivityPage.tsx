@@ -96,14 +96,14 @@ export function ActivityPage() {
             <Link
               key={entry.to}
               to={entry.to}
-              className="flex items-center justify-between gap-3 py-4 transition active:bg-slate-50/50"
+              className="flex items-center justify-between gap-3 py-4 ui-list-row"
             >
               <div className="min-w-0">
-                <p className="text-[14px] font-semibold text-slate-900">{entry.title}</p>
-                <p className="mt-0.5 truncate text-[12px] text-slate-500">{entry.description}</p>
+                <p className="text-ui-emphasis font-semibold text-slate-900">{entry.title}</p>
+                <p className="mt-0.5 truncate text-ui-caption text-slate-500">{entry.description}</p>
               </div>
               <div className="flex shrink-0 items-center gap-1.5">
-                <span className="text-[13px] font-semibold tabular-nums text-slate-500">{entry.count}</span>
+                <span className="text-ui-body font-semibold tabular-nums text-slate-500">{entry.count}</span>
                 <ChevronRight className="h-4 w-4 text-slate-400" />
               </div>
             </Link>

@@ -35,7 +35,7 @@ export function PropertyRatingSummary({ property, compact = false }: PropertyRat
     if (hasComment) {
       return <EvaluationCommentIcon />;
     }
-    return <span className="text-[11px] font-medium text-slate-400">평가 전</span>;
+    return <span className="text-ui-caption font-medium text-slate-400">평가 전</span>;
   }
 
   return (
@@ -43,7 +43,7 @@ export function PropertyRatingSummary({ property, compact = false }: PropertyRat
       {ratedItems.map((item) => (
         <span
           key={item.key}
-          className="inline-flex items-center gap-0.5 rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-normal text-emerald-700"
+          className="inline-flex items-center gap-0.5 ui-badge bg-emerald-50 font-normal text-emerald-700"
         >
           <span>{item.shortLabel}</span>
           <span aria-hidden="true">★{property[item.key]}</span>

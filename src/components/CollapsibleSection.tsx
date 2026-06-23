@@ -22,13 +22,13 @@ export function CollapsibleSection({ title, summary, defaultOpen = false, childr
     <section className="toss-card overflow-hidden p-0">
       <button
         type="button"
-        className="flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left transition active:bg-slate-50"
+        className="flex min-h-11 w-full items-center justify-between gap-3 px-4 py-3.5 text-left transition active:scale-[0.98] active:bg-slate-50"
         aria-expanded={open}
         onClick={() => setOpen((prev) => !prev)}
       >
         <div className="min-w-0">
-          <p className="text-[15px] font-semibold text-slate-950">{title}</p>
-          {!open && summary ? <p className="mt-0.5 truncate text-[12px] text-slate-500">{summary}</p> : null}
+          <p className="text-ui-emphasis font-semibold text-slate-950">{title}</p>
+          {!open && summary ? <p className="mt-0.5 truncate text-ui-caption text-slate-500">{summary}</p> : null}
         </div>
         <ChevronDown
           className={`h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200 ${

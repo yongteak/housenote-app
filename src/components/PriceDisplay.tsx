@@ -10,7 +10,7 @@ import { formatPriceManwon, formatWon } from "../lib/format";
 type PriceDisplaySize = "sm" | "md" | "lg";
 
 const sizeClass: Record<PriceDisplaySize, string> = {
-  sm: "text-[15px] font-medium tracking-tight",
+  sm: "text-ui-emphasis font-medium tracking-tight",
   md: "text-[22px] font-medium tracking-tight",
   lg: "text-[26px] font-semibold tracking-tight leading-none",
 };
@@ -50,7 +50,11 @@ export function PriceDisplay({
   return (
     <button
       type="button"
-      className={cn("cursor-pointer text-left transition active:opacity-60", sizeClass[size], className)}
+      className={cn(
+        "min-h-11 cursor-pointer text-left transition active:scale-[0.98] active:opacity-70",
+        sizeClass[size],
+        className,
+      )}
       onClick={handleClick}
       aria-label={showNumeric ? "억·만원 단위로 보기" : "원화 숫자로 보기"}
     >

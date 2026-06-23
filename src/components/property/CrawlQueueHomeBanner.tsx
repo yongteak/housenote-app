@@ -39,11 +39,11 @@ export function CrawlQueueHomeBanner({ actor }: CrawlQueueHomeBannerProps) {
   return (
     <Link
       to="/properties/new"
-      className="mx-4 mb-2 flex items-center justify-between gap-2 border-b border-slate-100 py-2.5 transition active:bg-slate-50/50"
+      className="mx-4 mb-2 flex min-h-11 items-center justify-between gap-2 border-b border-slate-100 py-2.5 ui-list-row"
     >
       <div className="min-w-0">
-        <p className="text-[13px] font-semibold text-slate-900">저장한 링크 처리 현황</p>
-        <p className="mt-0.5 text-[12px] text-slate-500">{parts.join(" · ")}</p>
+        <p className="text-ui-body font-semibold text-slate-900">저장한 링크 처리 현황</p>
+        <p className="mt-0.5 text-ui-caption text-slate-500">{parts.join(" · ")}</p>
       </div>
       <ChevronRight className="h-4 w-4 shrink-0 text-slate-400" />
     </Link>

@@ -57,7 +57,7 @@ function AreaUnitToggle({ unit, onChange }: { unit: AreaUnit; onChange: (unit: A
     <div className="inline-flex shrink-0 rounded-lg bg-slate-100 p-0.5 border border-slate-200/40">
       <button
         type="button"
-        className={`min-w-[2.25rem] rounded-md px-2. py-0.5 text-[11px] font-semibold transition-all duration-150 ${
+        className={`min-w-[2.25rem] rounded-md px-2. py-0.5 text-ui-caption font-semibold transition-all duration-150 ${
           unit === "pyeong" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-800"
         }`}
         onClick={() => onChange("pyeong")}
@@ -66,7 +66,7 @@ function AreaUnitToggle({ unit, onChange }: { unit: AreaUnit; onChange: (unit: A
       </button>
       <button
         type="button"
-        className={`min-w-[2.25rem] rounded-md px-2 py-0.5 text-[11px] font-semibold transition-all duration-150 ${
+        className={`min-w-[2.25rem] rounded-md px-2 py-0.5 text-ui-caption font-semibold transition-all duration-150 ${
           unit === "m2" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-800"
         }`}
         onClick={() => onChange("m2")}
@@ -91,11 +91,11 @@ function InfoRow({
 }) {
   return (
     <div className="flex items-center justify-between gap-4 py-3 first:pt-1.5 last:pb-1.5">
-      <span className="flex items-center gap-2 text-[13px] font-medium text-slate-500">
+      <span className="flex items-center gap-2 text-ui-body font-medium text-slate-500">
         {Icon ? <Icon className="h-3.5 w-3.5 text-slate-400" /> : null}
         {label}
       </span>
-      <span className="text-right text-[13px] font-semibold text-slate-900">{value}</span>
+      <span className="text-right text-ui-body font-semibold text-slate-900">{value}</span>
     </div>
   );
 }
@@ -105,28 +105,28 @@ function ComplexPropertyCrawlPreview({ crawl }: PropertyCrawlPreviewProps) {
     <div className="space-y-4">
       <article className="toss-card border-slate-200/80 space-y-3 bg-white p-5">
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="inline-flex items-center rounded-md bg-slate-50 border border-slate-200/40 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
+          <span className="ui-badge border border-slate-200/40 bg-slate-50 font-semibold text-slate-600">
             단지
           </span>
-          <span className="inline-flex items-center rounded-md bg-slate-50 border border-slate-200/40 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
+          <span className="ui-badge border border-slate-200/40 bg-slate-50 font-semibold text-slate-600">
             {crawl.property_type ?? "아파트"}
           </span>
           {crawl.deal_type ? (
-            <span className="inline-flex items-center rounded-md bg-slate-50 border border-slate-200/40 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
+            <span className="ui-badge border border-slate-200/40 bg-slate-50 font-semibold text-slate-600">
               {crawl.deal_type}
             </span>
           ) : null}
         </div>
         <div className="space-y-1">
-          <h2 className="text-[19px] font-bold text-slate-900 tracking-tight leading-tight">{crawl.title}</h2>
-          <div className="flex items-center gap-1 text-[13px] text-slate-400 font-medium">
+          <h2 className="text-ui-title-lg font-bold text-slate-900 tracking-tight leading-tight">{crawl.title}</h2>
+          <div className="flex items-center gap-1 text-ui-body text-slate-400 font-medium">
             <MapPin className="h-3.5 w-3.5 shrink-0" />
             <span className="truncate">{crawl.address}</span>
           </div>
         </div>
         {crawl.current_price_value != null ? (
           <div className="pt-1.5 border-t border-slate-100 flex items-baseline justify-between">
-            <span className="text-[13px] font-semibold text-slate-400 uppercase tracking-wider">최근 실거래</span>
+            <span className="text-ui-body font-semibold text-slate-400 uppercase tracking-wider">최근 실거래</span>
             <PriceDisplay value={crawl.current_price_value} size="lg" className="text-slate-950" />
           </div>
         ) : null}
@@ -143,7 +143,7 @@ function ComplexPropertyCrawlPreview({ crawl }: PropertyCrawlPreviewProps) {
         href={crawl.source_url}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 py-3.5 text-[13px] font-semibold text-slate-700 transition active:bg-slate-100"
+        className="toss-button-surface w-full active:scale-[0.98]"
       >
         <ExternalLink className="h-4 w-4" />
         <span>네이버 부동산에서 원본 링크 열기</span>
@@ -191,19 +191,19 @@ function ArticlePropertyCrawlPreview({ crawl }: PropertyCrawlPreviewProps) {
       <article className="toss-card border-slate-200/80 p-5 space-y-4.5 bg-white">
         {/* 상단 메타 칩스 - 동일한 스타일 언어로 통일하여 시각적 복잡도 최소화 */}
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="inline-flex items-center rounded-md bg-slate-50 border border-slate-200/40 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
+          <span className="ui-badge border border-slate-200/40 bg-slate-50 font-semibold text-slate-600">
             {crawl.property_type ?? "아파트"}
           </span>
-          <span className="inline-flex items-center rounded-md bg-slate-50 border border-slate-200/40 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
+          <span className="ui-badge border border-slate-200/40 bg-slate-50 font-semibold text-slate-600">
             {crawl.deal_type ?? "매매"}
           </span>
           {extras?.redevelopmentLabel ? (
-            <span className="inline-flex items-center rounded-md bg-slate-50 border border-slate-200/40 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
+            <span className="ui-badge border border-slate-200/40 bg-slate-50 font-semibold text-slate-600">
               {extras.redevelopmentLabel}
             </span>
           ) : null}
           {extras?.isDirectTrade ? (
-            <span className="inline-flex items-center rounded-md bg-slate-50 border border-slate-200/40 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
+            <span className="ui-badge border border-slate-200/40 bg-slate-50 font-semibold text-slate-600">
               직거래
             </span>
           ) : null}
@@ -211,10 +211,10 @@ function ArticlePropertyCrawlPreview({ crawl }: PropertyCrawlPreviewProps) {
 
         {/* 타이틀 및 주소 정보 */}
         <div className="space-y-1">
-          <h2 className="text-[19px] font-bold text-slate-900 tracking-tight leading-tight">
+          <h2 className="text-ui-title-lg font-bold text-slate-900 tracking-tight leading-tight">
             {crawl.title}
           </h2>
-          <div className="flex items-center gap-1 text-[13px] text-slate-400 font-medium">
+          <div className="flex items-center gap-1 text-ui-body text-slate-400 font-medium">
             <MapPin className="h-3.5 w-3.5 shrink-0" />
             <span className="truncate">{crawl.address}</span>
           </div>
@@ -222,7 +222,7 @@ function ArticlePropertyCrawlPreview({ crawl }: PropertyCrawlPreviewProps) {
 
         {/* 거래가격 정보 */}
         <div className="pt-1.5 border-t border-slate-100 flex items-baseline justify-between">
-          <span className="text-[13px] font-semibold text-slate-400 uppercase tracking-wider">등록 가격</span>
+          <span className="text-ui-body font-semibold text-slate-400 uppercase tracking-wider">등록 가격</span>
           <div className="text-right">
             {crawl.current_price_value != null ? (
               <PriceDisplay
@@ -241,31 +241,31 @@ function ArticlePropertyCrawlPreview({ crawl }: PropertyCrawlPreviewProps) {
         {/* 스펙 섹션 및 세그먼트 컨트롤 */}
         <div className="pt-3.5 border-t border-slate-100 space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-[13px] font-semibold text-slate-400 uppercase tracking-wider">매물 정보</span>
+            <span className="text-ui-body font-semibold text-slate-400 uppercase tracking-wider">매물 정보</span>
             <AreaUnitToggle unit={areaUnit} onChange={setAreaUnit} />
           </div>
 
           <div className="grid grid-cols-2 gap-x-6 gap-y-3.5">
             <div>
-              <span className="text-[11px] font-semibold text-slate-400 block mb-0.5">공급 / 전용면적</span>
-              <span className="text-[13.5px] font-bold text-slate-800">{areaDisplay}</span>
+              <span className="text-ui-caption font-semibold text-slate-400 block mb-0.5">공급 / 전용면적</span>
+              <span className="text-ui-body font-bold text-slate-800">{areaDisplay}</span>
             </div>
             <div>
-              <span className="text-[11px] font-semibold text-slate-400 block mb-0.5">전용률</span>
-              <span className="text-[13.5px] font-bold text-slate-800">
+              <span className="text-ui-caption font-semibold text-slate-400 block mb-0.5">전용률</span>
+              <span className="text-ui-body font-bold text-slate-800">
                 {exclusiveRatio != null ? `${exclusiveRatio}%` : "-"}
               </span>
             </div>
             <div>
-              <span className="text-[11px] font-semibold text-slate-400 block mb-0.5">층수 / 방향</span>
-              <span className="text-[13.5px] font-bold text-slate-800">
+              <span className="text-ui-caption font-semibold text-slate-400 block mb-0.5">층수 / 방향</span>
+              <span className="text-ui-body font-bold text-slate-800">
                 {crawl.floor_info ?? "-"} · {crawl.direction ?? "-"}향
               </span>
             </div>
             {confirmDate ? (
               <div>
-                <span className="text-[11px] font-semibold text-slate-400 block mb-0.5">네이버 검증일</span>
-                <span className="text-[13.5px] font-bold text-rose-600 flex items-center gap-1">
+                <span className="text-ui-caption font-semibold text-slate-400 block mb-0.5">네이버 검증일</span>
+                <span className="text-ui-body font-bold text-rose-600 flex items-center gap-1">
                   {formatVerificationDate(confirmDate)}
                 </span>
               </div>
@@ -276,8 +276,8 @@ function ArticlePropertyCrawlPreview({ crawl }: PropertyCrawlPreviewProps) {
         {/* 한줄 특징 요약 */}
         {feature ? (
           <div className="pt-3.5 border-t border-slate-100">
-            <span className="text-[11px] font-semibold text-slate-400 block mb-1.5 uppercase tracking-wider">특징</span>
-            <p className="text-[13px] leading-relaxed text-slate-700 font-medium bg-slate-50 rounded-xl p-3 border border-slate-100">
+            <span className="text-ui-caption font-semibold text-slate-400 block mb-1.5 uppercase tracking-wider">특징</span>
+            <p className="text-ui-body leading-relaxed text-slate-700 font-medium bg-slate-50 rounded-xl p-3 border border-slate-100">
               {feature}
             </p>
           </div>
@@ -337,7 +337,7 @@ function ArticlePropertyCrawlPreview({ crawl }: PropertyCrawlPreviewProps) {
       {/* 중개사 상세 설명 아코디언 */}
       {description ? (
         <CollapsibleSection title="중개사 설명" summary="상세 광고문">
-          <p className="whitespace-pre-wrap text-[13px] leading-relaxed text-slate-700">{description}</p>
+          <p className="whitespace-pre-wrap text-ui-body leading-relaxed text-slate-700">{description}</p>
         </CollapsibleSection>
       ) : null}
 
@@ -346,7 +346,7 @@ function ArticlePropertyCrawlPreview({ crawl }: PropertyCrawlPreviewProps) {
         href={crawl.source_url}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 py-3.5 text-[13px] font-semibold text-slate-700 transition active:bg-slate-100"
+        className="toss-button-surface w-full active:scale-[0.98]"
       >
         <ExternalLink className="h-4 w-4" />
         <span>네이버 부동산에서 원본 링크 열기</span>

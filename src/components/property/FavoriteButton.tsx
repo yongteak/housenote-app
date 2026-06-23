@@ -34,7 +34,7 @@ export function FavoriteButton({ propertyId, className, size = "md" }: FavoriteB
     return null;
   }
 
-  const iconSize = size === "sm" ? "h-4 w-4" : "h-5 w-5";
+  const iconSize = size === "sm" ? "h-5 w-5" : "h-5 w-5";
 
   return (
     <button
@@ -43,8 +43,7 @@ export function FavoriteButton({ propertyId, className, size = "md" }: FavoriteB
       aria-pressed={favorited}
       disabled={toggleMutation.isPending}
       className={cn(
-        "inline-flex items-center justify-center rounded-full transition active:scale-95",
-        size === "sm" ? "h-8 w-8" : "h-9 w-9",
+        "inline-flex h-11 min-h-11 w-11 min-w-11 items-center justify-center rounded-full transition active:scale-95",
         favorited ? "text-rose-500" : "text-slate-300 hover:text-rose-400",
         className,
       )}

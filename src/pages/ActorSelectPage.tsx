@@ -33,23 +33,23 @@ export function ActorSelectPage() {
   return (
     <section className="space-y-4 pt-2">
       <article className="toss-card">
-        <p className="text-[12px] text-slate-500">전화번호 뒷자리로 저장 주체를 고르세요.</p>
-        <p className="mt-1 text-[18px] text-slate-900">현재 기록자 선택</p>
+        <p className="text-ui-caption text-slate-500">전화번호 뒷자리로 저장 주체를 고르세요.</p>
+        <p className="mt-1 text-ui-title text-slate-900">현재 기록자 선택</p>
       </article>
 
       <div className="grid grid-cols-1 gap-3">
         {isLoading ? (
-          <p className="text-[13px] text-slate-500">저장자 목록을 불러오는 중...</p>
+          <p className="text-ui-body text-slate-500">저장자 목록을 불러오는 중...</p>
         ) : (
           data?.map((actor) => (
             <button
               key={actor.id}
               type="button"
-              className="toss-card text-left"
+              className="toss-card min-h-11 text-left transition active:scale-[0.98] active:bg-slate-50"
               onClick={() => handleSelectActor(actor, navigate)}
             >
-              <p className="text-[13px] text-slate-500">{actor.phone_suffix}</p>
-              <p className="text-[19px] text-slate-900">{actor.display_name}</p>
+              <p className="text-ui-body text-slate-500">{actor.phone_suffix}</p>
+              <p className="text-ui-title-lg text-slate-900">{actor.display_name}</p>
             </button>
           ))
         )}

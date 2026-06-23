@@ -93,14 +93,14 @@ export function PropertyEditorPage() {
             {enqueueMutation.isPending ? "저장 중..." : "저장하기"}
           </Button>
           {enqueueMutation.error ? (
-            <p className="px-1 text-[12px] text-rose-500">{(enqueueMutation.error as Error).message}</p>
+            <p className="px-1 text-ui-caption text-rose-500">{(enqueueMutation.error as Error).message}</p>
           ) : null}
         </div>
 
         {showCenterGuide ? (
           <div className="flex flex-1 flex-col items-center justify-center py-10 text-center">
-            <p className="text-[14px] font-medium text-slate-700">관심 매물 링크를 저장해 보세요</p>
-            <p className="mt-2 max-w-xs text-[12px] leading-relaxed text-slate-400">
+            <p className="text-ui-emphasis font-medium text-slate-700">관심 매물 링크를 저장해 보세요</p>
+            <p className="mt-2 max-w-xs text-ui-caption leading-relaxed text-slate-400">
               저장하면 PC에서 순서대로 정보를 불러와요.
               <br />
               완료된 매물은 목록과 상세에서 확인할 수 있어요.

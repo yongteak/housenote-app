@@ -13,9 +13,9 @@ const variantClassName: Record<ButtonVariant, string> = {
 };
 
 const sizeClassName: Record<ButtonSize, string> = {
-  sm: "h-9 px-3 text-[13px]",
-  md: "h-11 px-4 text-[14px]",
-  icon: "h-9 w-9 p-0",
+  sm: "h-11 min-h-11 px-3 text-ui-caption",
+  md: "h-11 min-h-11 px-4 text-ui-button",
+  icon: "h-11 min-h-11 w-11 min-w-11 p-0",
 };
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {

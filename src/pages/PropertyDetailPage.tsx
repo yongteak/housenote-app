@@ -117,7 +117,7 @@ type SectionProps = {
 function Section({ label, children }: SectionProps) {
   return (
     <section>
-      <p className="mb-2 px-1 text-[12px] font-semibold text-slate-500">{label}</p>
+      <p className="mb-2 px-1 text-ui-caption font-semibold text-slate-500">{label}</p>
       {children}
     </section>
   );
@@ -131,8 +131,8 @@ type DetailRowProps = {
 function DetailRow({ label, value }: DetailRowProps) {
   return (
     <div className="flex items-start justify-between gap-3 px-3.5 py-3">
-      <span className="shrink-0 text-[13px] text-slate-500">{label}</span>
-      <span className="text-right text-[13px] font-semibold text-slate-900">{value}</span>
+      <span className="shrink-0 text-ui-body text-slate-500">{label}</span>
+      <span className="text-right text-ui-body font-semibold text-slate-900">{value}</span>
     </div>
   );
 }
@@ -167,26 +167,17 @@ function PropertyStatusChips({ property, visited, decisionStatus, ratingAverage 
   return (
     <div className="flex flex-wrap items-center gap-1.5">
       {property.property_type ? (
-        <span className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600">
-          {property.property_type}
-        </span>
+        <span className="ui-badge bg-slate-100 text-slate-600">{property.property_type}</span>
       ) : null}
       {property.deal_type ? (
-        <span className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600">
-          {property.deal_type}
-        </span>
+        <span className="ui-badge bg-slate-100 text-slate-600">{property.deal_type}</span>
       ) : null}
-      <span
-        className={cn(
-          "inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-medium",
-          visited ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-500",
-        )}
-      >
+      <span className={cn("ui-badge", visited ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-500")}>
         {visited ? "방문함" : "미방문"}
       </span>
       <span
         className={cn(
-          "inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-medium",
+          "ui-badge",
           decisionStatus === "revisit" && "bg-amber-50 text-amber-700",
           decisionStatus === "review" && "bg-blue-50 text-blue-700",
           decisionStatus === "hold" && "bg-slate-100 text-slate-600",
@@ -196,9 +187,7 @@ function PropertyStatusChips({ property, visited, decisionStatus, ratingAverage 
         {statusLabelMap[decisionStatus]}
       </span>
       {ratingAverage != null ? (
-        <span className="inline-flex items-center rounded-md bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700">
-          ★ {ratingAverage.toFixed(1)}
-        </span>
+        <span className="ui-badge bg-emerald-50 text-emerald-700">★ {ratingAverage.toFixed(1)}</span>
       ) : null}
     </div>
   );
@@ -378,7 +367,7 @@ export function PropertyDetailPage() {
             {crawlReady ? (
               <button
                 type="button"
-                className="rounded-xl px-2 py-1.5 text-[13px] font-semibold text-emerald-600 transition hover:bg-emerald-50 active:bg-emerald-50/80"
+                className="ui-link-btn text-emerald-600 hover:bg-emerald-50"
                 onClick={scrollToRatingSection}
               >
                 평가
@@ -415,11 +404,11 @@ export function PropertyDetailPage() {
                 </Suspense>
               ) : (
                 <div className="flex aspect-[16/10] flex-col items-center justify-center gap-1 px-6 text-center">
-                  <p className="text-[13px] font-medium text-slate-500">
+                  <p className="text-ui-body font-medium text-slate-500">
                     {crawlReady ? "이미지 없음" : "정보를 불러오는 중"}
                   </p>
                   {!crawlReady ? (
-                    <p className="text-[11px] text-slate-400">PC에서 매물 정보를 가져오면 표시돼요</p>
+                    <p className="text-ui-caption text-slate-400">PC에서 매물 정보를 가져오면 표시돼요</p>
                   ) : null}
                 </div>
               )}
@@ -427,7 +416,7 @@ export function PropertyDetailPage() {
 
             <div className="p-4">
               <div className="flex items-start justify-between gap-3">
-                <h2 className="min-w-0 flex-1 text-[18px] font-bold leading-snug text-slate-950">
+                <h2 className="min-w-0 flex-1 text-ui-title font-bold leading-snug text-slate-950">
                   {getPropertyDisplayTitle(property)}
                 </h2>
                 {property.source_url ? (
@@ -435,7 +424,7 @@ export function PropertyDetailPage() {
                     href={property.source_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex shrink-0 cursor-pointer items-center gap-0.5 pt-0.5 text-[12px] font-medium text-slate-400 transition hover:text-slate-600 active:opacity-70"
+                    className="inline-flex shrink-0 cursor-pointer items-center gap-0.5 pt-0.5 text-ui-caption font-medium text-slate-400 transition hover:text-slate-600 active:opacity-70"
                   >
                     <span>네이버 부동산</span>
                     <ExternalLink className="h-3 w-3" strokeWidth={2.25} />
@@ -443,7 +432,7 @@ export function PropertyDetailPage() {
                 ) : null}
               </div>
               {property.address ? (
-                <p className="mt-2 text-[13px] leading-relaxed text-slate-500">{property.address}</p>
+                <p className="mt-2 text-ui-body leading-relaxed text-slate-500">{property.address}</p>
               ) : null}
               <div className="mt-2">
                 <CrawlStatusBadge property={property} />
@@ -460,7 +449,7 @@ export function PropertyDetailPage() {
                   </div>
 
                   <div className="mt-4 border-t border-slate-100 pt-4">
-                    <p className="text-[11px] font-medium text-slate-500">{isComplex ? complexPriceLabel : "등록가"}</p>
+                    <p className="text-ui-caption font-medium text-slate-500">{isComplex ? complexPriceLabel : "등록가"}</p>
                     <PriceDisplay value={property.current_price_value} size="lg" className="mt-0.5 text-emerald-600" />
                   </div>
                 </>
@@ -507,17 +496,17 @@ export function PropertyDetailPage() {
               className="toss-card scroll-mt-14 space-y-4 border-slate-200"
             >
               {!crawlReady ? (
-                <p className="text-[13px] text-slate-400">
+                <p className="text-ui-body text-slate-400">
                   매물 정보를 모두 불러온 뒤에 평가할 수 있어요.
                 </p>
               ) : (
                 <>
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="text-[14px] font-semibold text-slate-900">출퇴근 · 학교 · 편의시설</p>
+                  <p className="text-ui-emphasis font-semibold text-slate-900">출퇴근 · 학교 · 편의시설</p>
                 </div>
                 {ratingAverage != null ? (
-                  <span className="shrink-0 rounded-full bg-amber-50 px-2.5 py-1 text-[12px] font-bold text-amber-700">
+                  <span className="shrink-0 rounded-full bg-amber-50 px-2.5 py-1 text-ui-caption text-amber-700">
                     평균 {ratingAverage.toFixed(1)}
                   </span>
                 ) : null}
@@ -526,7 +515,7 @@ export function PropertyDetailPage() {
               {hasRatings ? (
                 <PropertyRatingSummary property={ratingPreviewRecord!} />
               ) : (
-                <p className="text-[13px] text-slate-400">아직 평가가 없습니다. 아래에서 별점을 남겨 보세요.</p>
+                <p className="text-ui-body text-slate-400">아직 평가가 없습니다. 아래에서 별점을 남겨 보세요.</p>
               )}
 
               <div className="space-y-4 border-t border-slate-100 pt-4">
@@ -542,7 +531,7 @@ export function PropertyDetailPage() {
               </div>
 
               <div className="space-y-1.5 border-t border-slate-100 pt-4">
-                <p className="text-[13px] font-medium text-slate-600">메모</p>
+                <p className="text-ui-body font-medium text-slate-600">메모</p>
                 <textarea
                   className="toss-textarea font-medium"
                   rows={4}
@@ -553,8 +542,8 @@ export function PropertyDetailPage() {
 
               <div className="space-y-4 border-t border-slate-100 pt-4">
                 <div className="flex items-center justify-between">
-                  <p className="text-[14px] font-semibold text-slate-900">방문 · 판단</p>
-                  <label className="flex items-center gap-1.5 text-[13px] font-medium text-slate-700 select-none">
+                  <p className="text-ui-emphasis font-semibold text-slate-900">방문 · 판단</p>
+                  <label className="flex items-center gap-1.5 text-ui-body font-medium text-slate-700 select-none">
                     <span>방문함</span>
                     <input
                       type="checkbox"
@@ -565,17 +554,17 @@ export function PropertyDetailPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <p className="text-[13px] font-medium text-slate-600">구매 판단</p>
+                  <p className="text-ui-body font-medium text-slate-600">구매 판단</p>
                   <div className="flex flex-wrap gap-1.5">
                     {decisionOptions.map((option) => (
                       <button
                         key={option.value}
                         type="button"
                         className={cn(
-                          "rounded-full px-3.5 py-1.5 text-[12.5px] font-semibold transition",
+                          "min-h-11 rounded-full px-4 py-2 text-ui-body font-semibold transition active:scale-[0.98]",
                           decisionStatus === option.value
-                            ? "bg-slate-950 text-white"
-                            : "bg-slate-100 text-slate-600 hover:bg-slate-200",
+                            ? "bg-slate-950 text-white ring-2 ring-slate-300/80"
+                            : "bg-slate-100 text-slate-600 active:bg-slate-200",
                         )}
                         onClick={() => setValue("decision_status", option.value, { shouldDirty: true })}
                       >
@@ -587,17 +576,17 @@ export function PropertyDetailPage() {
 
                 {visited ? (
                   <div>
-                    <p className="mb-2 text-[13px] font-medium text-slate-600">방문일</p>
+                    <p className="mb-2 text-ui-body font-medium text-slate-600">방문일</p>
                     <input className="toss-input" type="date" {...register("visited_at")} />
                   </div>
                 ) : null}
               </div>
 
               {formState.errors.visited_at ? (
-                <p className="text-[12px] text-rose-500">{formState.errors.visited_at.message}</p>
+                <p className="text-ui-caption text-rose-500">{formState.errors.visited_at.message}</p>
               ) : null}
               {saveMutation.error ? (
-                <p className="text-[12px] text-rose-500">{(saveMutation.error as Error).message}</p>
+                <p className="text-ui-caption text-rose-500">{(saveMutation.error as Error).message}</p>
               ) : null}
 
               <Button

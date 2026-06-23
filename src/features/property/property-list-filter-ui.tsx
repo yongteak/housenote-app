@@ -172,7 +172,7 @@ export function MapViewFloatingButton({ onClick }: { onClick: () => void }) {
       >
         <Map className="h-4 w-4 shrink-0" />
         <motion.span
-          className="overflow-hidden whitespace-nowrap text-[13px] font-bold text-white"
+          className="overflow-hidden whitespace-nowrap text-ui-body font-bold text-white"
           initial={{ opacity: 0, width: 0, marginLeft: 0 }}
           animate={{
             opacity: expanded ? 1 : 0,
@@ -289,10 +289,10 @@ function RatingFilterSheet({
 
         <div className="space-y-4 border-t border-slate-100 pt-4">
           <div className="flex items-center justify-between">
-            <p className="text-[14px] font-bold text-slate-900">항목별 최소 점수</p>
+            <p className="text-ui-emphasis font-bold text-slate-900">항목별 최소 점수</p>
             <button
               type="button"
-              className="text-[12px] font-semibold text-slate-500"
+              className="ui-link-btn px-2 text-ui-caption font-semibold text-slate-500"
               onClick={() =>
                 onChange({
                   ...value,

@@ -89,11 +89,13 @@ export function ProfilePage() {
         rightSlot={
           <Button
             variant="ghost"
-            size="icon"
-            aria-label="로그아웃"
-            leadingIcon={<LogOut className="h-4 w-4 text-slate-500" />}
+            size="sm"
+            className="text-ui-caption font-medium text-slate-500"
+            leadingIcon={<LogOut className="h-4 w-4" />}
             onClick={handleLogout}
-          />
+          >
+            로그아웃
+          </Button>
         }
       />
       <main className="flex flex-1 flex-col px-4 pb-6 pt-2">
@@ -102,8 +104,8 @@ export function ProfilePage() {
             <ActorAvatar phoneSuffix={actor?.phoneSuffix} variant={avatarVariant} size="lg" className="h-14 w-14" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-[17px] font-bold text-slate-950">{actor?.actorName ?? "저장자"}</p>
-            <p className="mt-0.5 text-[13px] text-slate-500">전화번호 뒷자리 {actor?.phoneSuffix ?? "0000"}</p>
+            <p className="text-ui-title font-bold text-slate-950">{actor?.actorName ?? "저장자"}</p>
+            <p className="mt-0.5 text-ui-body text-slate-500">전화번호 뒷자리 {actor?.phoneSuffix ?? "0000"}</p>
           </div>
         </div>
 
@@ -112,22 +114,22 @@ export function ProfilePage() {
             <Link
               key={stat.to}
               to={stat.to}
-              className="flex items-center justify-between gap-3 py-4 transition active:bg-slate-50/50"
+              className="flex items-center justify-between gap-3 py-4 ui-list-row"
             >
-              <p className="text-[14px] font-semibold text-slate-900">{stat.label}</p>
+              <p className="text-ui-emphasis font-semibold text-slate-900">{stat.label}</p>
               <div className="flex shrink-0 items-center gap-1.5">
-                <span className="text-[14px] font-bold tabular-nums text-slate-950">{stat.value}</span>
+                <span className="text-ui-emphasis font-bold tabular-nums text-slate-950">{stat.value}</span>
                 <ChevronRight className="h-4 w-4 text-slate-400" />
               </div>
             </Link>
           ))}
           <Link
             to="/activity"
-            className="flex items-center justify-between gap-3 py-4 transition active:bg-slate-50/50"
+            className="flex items-center justify-between gap-3 py-4 ui-list-row"
           >
             <div>
-              <p className="text-[14px] font-semibold text-slate-900">내 활동 보기</p>
-              <p className="mt-0.5 text-[12px] text-slate-500">히스토리, 즐겨찾기, 최근 본 항목, 평가 목록</p>
+              <p className="text-ui-emphasis font-semibold text-slate-900">내 활동 보기</p>
+              <p className="mt-0.5 text-ui-caption text-slate-500">히스토리, 즐겨찾기, 최근 본 항목, 평가 목록</p>
             </div>
             <ChevronRight className="h-4 w-4 shrink-0 text-slate-400" />
           </Link>

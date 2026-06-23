@@ -23,7 +23,7 @@ export function CrawlStatusBadge({ property, className }: CrawlStatusBadgeProps)
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-medium",
+        "ui-badge",
         status === "pending" && "bg-slate-100 text-slate-600",
         status === "processing" && "bg-blue-50 text-blue-700",
         status === "failed" && "bg-rose-50 text-rose-700",
