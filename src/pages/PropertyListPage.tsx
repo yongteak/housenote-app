@@ -53,10 +53,9 @@ export function PropertyListPage() {
   }, [filters]);
 
   const query = useQuery({
-    queryKey: ["properties", "home", actor?.actorId],
+    queryKey: ["properties", "home"],
     queryFn: () =>
       listProperties({
-        actorId: actor?.actorId,
         visited: "all",
         decisionStatus: "all",
       }),
