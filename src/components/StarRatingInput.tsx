@@ -4,14 +4,18 @@
  */
 type StarRatingInputProps = {
   label: string;
+  hint?: string;
   value: number | null;
   onChange: (value: number | null) => void;
 };
 
-export function StarRatingInput({ label, value, onChange }: StarRatingInputProps) {
+export function StarRatingInput({ label, hint, value, onChange }: StarRatingInputProps) {
   return (
     <div className="space-y-2">
-      <p className="text-[13px] text-slate-600">{label}</p>
+      <div>
+        <p className="text-[14px] font-semibold text-slate-800">{label}</p>
+        {hint ? <p className="mt-0.5 text-[12px] text-slate-500">{hint}</p> : null}
+      </div>
       <div className="flex gap-1">
         {[1, 2, 3, 4, 5].map((score) => {
           const active = value != null && score <= value;

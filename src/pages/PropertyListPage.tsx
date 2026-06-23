@@ -1,4 +1,4 @@
-import { lazy, Suspense, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Clock3 from "lucide-react/dist/esm/icons/clock-3";
 import Plus from "lucide-react/dist/esm/icons/plus";
@@ -6,25 +6,40 @@ import X from "lucide-react/dist/esm/icons/x";
 import CircleUserRound from "lucide-react/dist/esm/icons/circle-user-round";
 import { Link, useNavigate } from "react-router-dom";
 
+import { PropertyRatingSummary } from "../components/PropertyRatingSummary";
+import { StarRatingInput } from "../components/StarRatingInput";
 import { BottomSheet } from "../components/ui/BottomSheet";
 import { Button } from "../components/ui/Button";
 import { EmptyState } from "../components/ui/EmptyState";
 import { SelectorField, SelectorList, type SelectorOption } from "../components/ui/Selector";
 import { getMockProperties } from "../fixtures/mobile-mvp-ui-mock";
 import { listProperties } from "../features/property/property.api";
+import {
+  DEFAULT_RATING_FILTER,
+  PROPERTY_RATING_ITEMS,
+  getRatingFilterLabel,
+  matchesRatingFilter,
+  type RatingFilterCriteria,
+  type RatingFilterStatus,
+} from "../features/property/property-ratings";
 import { cn } from "../lib/cn";
 import { useAuth } from "../lib/auth-context";
 import { formatWon } from "../lib/format";
-import type { DecisionStatus, PropertyFilters, PropertyRecord } from "../types/property";
+import {
+  loadPropertyListFilters,
+  savePropertyListFilters,
+  type ListViewMode,
+  type PropertyListFilterState,
+  type StatusFilterValue,
+  type VisitedFilterValue,
+} from "../lib/property-list-filter-storage";
+import type { DecisionStatus, PropertyRecord } from "../types/property";
 
 const PropertyMapWithSheet = lazy(() =>
   import("../features/map/PropertyMapWithSheet").then((module) => ({ default: module.PropertyMapWithSheet })),
 );
 
-type ListViewMode = "list" | "map";
-type VisitedFilterValue = NonNullable<PropertyFilters["visited"]>;
-type StatusFilterValue = NonNullable<PropertyFilters["decisionStatus"]>;
-type FilterSheet = "visited" | "status" | null;
+type FilterSheet = "visited" | "status" | "rating" | null;
 
 const statusLabelMap: Record<DecisionStatus, string> = {
   review: "다시보기",
@@ -47,6 +62,12 @@ const statusOptions: SelectorOption<StatusFilterValue>[] = [
   { value: "revisit", label: "재방문" },
 ];
 
+const ratingStatusOptions: SelectorOption<RatingFilterStatus>[] = [
+  { value: "all", label: "평가 전체" },
+  { value: "rated", label: "평가함" },
+  { value: "unrated", label: "미평가" },
+];
+
 function statusLabel(status: DecisionStatus): string {
   return statusLabelMap[status] ?? "검토";
 }
@@ -59,11 +80,13 @@ function applyFilters(
   properties: PropertyRecord[],
   visitedFilter: VisitedFilterValue,
   statusFilter: StatusFilterValue,
+  ratingFilter: RatingFilterCriteria,
 ) {
   return properties.filter((property) => {
     if (visitedFilter === "yes" && !property.visited) return false;
     if (visitedFilter === "no" && property.visited) return false;
     if (statusFilter !== "all" && property.decision_status !== statusFilter) return false;
+    if (!matchesRatingFilter(property, ratingFilter)) return false;
     return true;
   });
 }
@@ -105,13 +128,20 @@ function ViewModeToggle({ mode, onChange }: ViewModeToggleProps) {
 type FilterControlsProps = {
   visitedFilter: VisitedFilterValue;
   statusFilter: StatusFilterValue;
+  ratingFilter: RatingFilterCriteria;
   onOpenSheet: (sheet: Exclude<FilterSheet, null>) => void;
   compact?: boolean;
 };
 
-function FilterControls({ visitedFilter, statusFilter, onOpenSheet, compact = false }: FilterControlsProps) {
+function FilterControls({
+  visitedFilter,
+  statusFilter,
+  ratingFilter,
+  onOpenSheet,
+  compact = false,
+}: FilterControlsProps) {
   return (
-    <div className={cn("grid grid-cols-2 gap-2", compact ? "" : "w-full")}>
+    <div className={cn("grid grid-cols-3 gap-2", compact ? "" : "w-full")}>
       <SelectorField
         label="방문"
         valueLabel={findLabel(visitedOptions, visitedFilter)}
@@ -124,36 +154,109 @@ function FilterControls({ visitedFilter, statusFilter, onOpenSheet, compact = fa
         onClick={() => onOpenSheet("status")}
         className={compact ? "py-2" : undefined}
       />
+      <SelectorField
+        label="평가"
+        valueLabel={getRatingFilterLabel(ratingFilter)}
+        onClick={() => onOpenSheet("rating")}
+        className={compact ? "py-2" : undefined}
+      />
     </div>
+  );
+}
+
+type RatingFilterSheetProps = {
+  open: boolean;
+  value: RatingFilterCriteria;
+  onClose: () => void;
+  onChange: (value: RatingFilterCriteria) => void;
+};
+
+function RatingFilterSheet({ open, value, onChange, onClose }: RatingFilterSheetProps) {
+  const minimumFields = {
+    rating_location: "minCommute",
+    rating_price: "minSchools",
+    rating_condition: "minConvenience",
+  } as const;
+
+  return (
+    <BottomSheet open={open} onClose={onClose} title="평가 필터">
+      <div className="space-y-5 px-4 pb-6">
+        <SelectorList
+          title="평가 여부"
+          selectedValue={value.status}
+          options={ratingStatusOptions}
+          onSelect={(status) => onChange({ ...value, status })}
+        />
+
+        <div className="space-y-4 border-t border-slate-100 pt-4">
+          <div className="flex items-center justify-between">
+            <p className="text-[14px] font-bold text-slate-900">항목별 최소 점수</p>
+            <button
+              type="button"
+              className="text-[12px] font-semibold text-slate-500"
+              onClick={() =>
+                onChange({
+                  ...value,
+                  minCommute: null,
+                  minSchools: null,
+                  minConvenience: null,
+                })
+              }
+            >
+              점수 초기화
+            </button>
+          </div>
+
+          {PROPERTY_RATING_ITEMS.map((item) => {
+            const field = minimumFields[item.key];
+            const minimum = value[field];
+
+            return (
+              <StarRatingInput
+                key={item.key}
+                label={`${item.label} ${minimum != null ? `${minimum}점 이상` : ""}`.trim()}
+                hint={minimum == null ? `${item.description} (선택)` : item.description}
+                value={minimum}
+                onChange={(next) => onChange({ ...value, [field]: next })}
+              />
+            );
+          })}
+        </div>
+
+        <div className="grid grid-cols-2 gap-2 border-t border-slate-100 pt-4">
+          <Button
+            variant="surface"
+            className="w-full"
+            onClick={() => onChange(DEFAULT_RATING_FILTER)}
+          >
+            전체 초기화
+          </Button>
+          <Button variant="primary" className="w-full" onClick={onClose}>
+            적용
+          </Button>
+        </div>
+      </div>
+    </BottomSheet>
   );
 }
 
 type FilterSheetsProps = {
   openSheet: FilterSheet;
-  visitedFilter: VisitedFilterValue;
-  statusFilter: StatusFilterValue;
+  filters: PropertyListFilterState;
   onClose: () => void;
-  onVisitedChange: (value: VisitedFilterValue) => void;
-  onStatusChange: (value: StatusFilterValue) => void;
+  onFiltersChange: (next: PropertyListFilterState) => void;
 };
 
-function FilterSheets({
-  openSheet,
-  visitedFilter,
-  statusFilter,
-  onClose,
-  onVisitedChange,
-  onStatusChange,
-}: FilterSheetsProps) {
+function FilterSheets({ openSheet, filters, onClose, onFiltersChange }: FilterSheetsProps) {
   return (
     <>
       <BottomSheet open={openSheet === "visited"} onClose={onClose} title="방문 필터">
         <SelectorList
           title="방문 상태"
-          selectedValue={visitedFilter}
+          selectedValue={filters.visited}
           options={visitedOptions}
-          onSelect={(value) => {
-            onVisitedChange(value);
+          onSelect={(visited) => {
+            onFiltersChange({ ...filters, visited });
             onClose();
           }}
         />
@@ -161,14 +264,20 @@ function FilterSheets({
       <BottomSheet open={openSheet === "status"} onClose={onClose} title="상태 필터">
         <SelectorList
           title="판단 상태"
-          selectedValue={statusFilter}
+          selectedValue={filters.status}
           options={statusOptions}
-          onSelect={(value) => {
-            onStatusChange(value);
+          onSelect={(status) => {
+            onFiltersChange({ ...filters, status });
             onClose();
           }}
         />
       </BottomSheet>
+      <RatingFilterSheet
+        open={openSheet === "rating"}
+        value={filters.rating}
+        onClose={onClose}
+        onChange={(rating) => onFiltersChange({ ...filters, rating })}
+      />
     </>
   );
 }
@@ -176,10 +285,12 @@ function FilterSheets({
 export function PropertyListPage() {
   const navigate = useNavigate();
   const { actor } = useAuth();
-  const [viewMode, setViewMode] = useState<ListViewMode>("list");
-  const [visitedFilter, setVisitedFilter] = useState<VisitedFilterValue>("all");
-  const [statusFilter, setStatusFilter] = useState<StatusFilterValue>("all");
+  const [filters, setFilters] = useState<PropertyListFilterState>(() => loadPropertyListFilters());
   const [openSheet, setOpenSheet] = useState<FilterSheet>(null);
+
+  useEffect(() => {
+    savePropertyListFilters(filters);
+  }, [filters]);
 
   const query = useQuery({
     queryKey: ["properties", "home", actor?.actorId],
@@ -198,8 +309,8 @@ export function PropertyListPage() {
   );
 
   const filteredProperties = useMemo(
-    () => applyFilters(sourceProperties, visitedFilter, statusFilter),
-    [sourceProperties, statusFilter, visitedFilter],
+    () => applyFilters(sourceProperties, filters.visited, filters.status, filters.rating),
+    [filters.rating, filters.status, filters.visited, sourceProperties],
   );
 
   const listPropertiesSorted = useMemo(() => sortForListView(filteredProperties), [filteredProperties]);
@@ -207,15 +318,13 @@ export function PropertyListPage() {
   const filterSheets = (
     <FilterSheets
       openSheet={openSheet}
-      visitedFilter={visitedFilter}
-      statusFilter={statusFilter}
+      filters={filters}
       onClose={() => setOpenSheet(null)}
-      onVisitedChange={setVisitedFilter}
-      onStatusChange={setStatusFilter}
+      onFiltersChange={setFilters}
     />
   );
 
-  if (viewMode === "map") {
+  if (filters.viewMode === "map") {
     return (
       <div className="fixed inset-0 z-40 mx-auto w-full max-w-xl bg-slate-100">
         <div className="absolute inset-0">
@@ -231,15 +340,16 @@ export function PropertyListPage() {
               size="sm"
               className="shrink-0 border-transparent bg-white/78 px-3 shadow-none"
               leadingIcon={<X className="h-4 w-4" />}
-              onClick={() => setViewMode("list")}
+              onClick={() => setFilters((current) => ({ ...current, viewMode: "list" }))}
             >
               닫기
             </Button>
             <div className="min-w-0 flex-1">
               <FilterControls
                 compact
-                visitedFilter={visitedFilter}
-                statusFilter={statusFilter}
+                visitedFilter={filters.visited}
+                statusFilter={filters.status}
+                ratingFilter={filters.rating}
                 onOpenSheet={setOpenSheet}
               />
             </div>
@@ -283,15 +393,19 @@ export function PropertyListPage() {
           </div>
         </div>
         <div className="px-4 pb-3">
-          <ViewModeToggle mode={viewMode} onChange={setViewMode} />
+          <ViewModeToggle
+            mode={filters.viewMode}
+            onChange={(viewMode) => setFilters((current) => ({ ...current, viewMode }))}
+          />
         </div>
       </header>
 
       <main className="flex-1 space-y-3 px-4 py-4 pb-6">
         <article className="toss-card border-slate-200 p-3">
           <FilterControls
-            visitedFilter={visitedFilter}
-            statusFilter={statusFilter}
+            visitedFilter={filters.visited}
+            statusFilter={filters.status}
+            ratingFilter={filters.rating}
             onOpenSheet={setOpenSheet}
           />
         </article>
@@ -302,7 +416,7 @@ export function PropertyListPage() {
         {filteredProperties.length === 0 ? (
           <EmptyState
             title="매물이 없어요."
-            description="우측 상단 + 버튼으로 첫 매물을 추가하세요."
+            description="필터를 바꾸거나 + 버튼으로 첫 매물을 추가하세요."
             action={
               <Button variant="primary" className="w-full" onClick={() => navigate("/properties/new")}>
                 추가하기
@@ -336,6 +450,9 @@ export function PropertyListPage() {
                       <div className="mt-2 flex flex-wrap gap-1.5 text-[11px] font-semibold text-slate-600">
                         <span className="rounded-md bg-slate-100 px-2 py-0.5">{property.visited ? "방문" : "미방문"}</span>
                         <span className="rounded-md bg-slate-100 px-2 py-0.5">{statusLabel(property.decision_status)}</span>
+                      </div>
+                      <div className="mt-2">
+                        <PropertyRatingSummary property={property} compact />
                       </div>
                       <p className="mt-2 text-[14px] font-bold text-emerald-700">
                         {formatWon(property.desired_price_value ?? property.current_price_value)}

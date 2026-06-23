@@ -73,28 +73,27 @@ a {
   }
 
   .ui-sheet-container {
-    left: 12px !important;
-    right: 12px !important;
-    width: auto !important;
-    max-width: none;
-    border-radius: 1.5rem 1.5rem 0 0;
+    border-radius: 1.5rem;
     border: 0.5px solid rgb(226 232 240 / 0.9);
     background: #fff;
     box-shadow:
-      0 -8px 32px rgb(15 23 42 / 0.12),
-      0 -1px 2px rgb(15 23 42 / 0.06);
+      0 8px 32px rgb(15 23 42 / 0.16),
+      0 1px 2px rgb(15 23 42 / 0.06);
+  }
+
+  .ui-sheet-container--inset {
+    box-shadow:
+      0 12px 40px rgb(15 23 42 / 0.18),
+      0 2px 8px rgb(15 23 42 / 0.08);
   }
 
   .ui-sheet-header {
     @apply py-2;
   }
 
-  .ui-sheet-content {
-    min-height: 0;
-  }
-
   .ui-sheet-content-scroller {
-    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 32px);
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+    -webkit-overflow-scrolling: touch;
   }
 
   .property-location-map {

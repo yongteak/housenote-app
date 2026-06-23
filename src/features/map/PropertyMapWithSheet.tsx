@@ -3,9 +3,10 @@ import { useNavigate } from "react-router-dom";
 import L from "leaflet";
 import { MapContainer, Marker, TileLayer, useMap } from "react-leaflet";
 import ExternalLink from "lucide-react/dist/esm/icons/external-link";
+import FileText from "lucide-react/dist/esm/icons/file-text";
 
+import { PropertyRatingSummary } from "../../components/PropertyRatingSummary";
 import { BottomSheet } from "../../components/ui/BottomSheet";
-import { Button } from "../../components/ui/Button";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { MapFilterStatsBar } from "./MapFilterStatsBar";
 import { MapFloatingControls, RegisterMap } from "./MapFloatingControls";
@@ -15,6 +16,9 @@ import {
   getMapPropertyStats,
   getPropertiesInLocationGroup,
 } from "./propertyMapMarkers";
+import {
+  getPropertyAverageRating,
+} from "../property/property-ratings";
 import { formatDate, formatPriceEok, formatPyeong, formatWon } from "../../lib/format";
 import { cn } from "../../lib/cn";
 import type { DecisionStatus, PropertyRecord } from "../../types/property";
@@ -130,22 +134,38 @@ function MapPropertyGroupSwitcher({ properties, selectedId, onSelect }: MapPrope
   );
 }
 
-function averageRating(property: PropertyRecord): number | null {
-  const ratings = [
-    property.rating_location,
-    property.rating_price,
-    property.rating_condition,
-    property.rating_sunlight,
-    property.rating_environment,
-  ].filter((value): value is number => value != null);
-
-  if (ratings.length === 0) return null;
-  return ratings.reduce((sum, value) => sum + value, 0) / ratings.length;
-}
-
 function formatArea(property: PropertyRecord): string {
   if (property.area_supply_m2 == null || property.area_private_m2 == null) return "-";
-  return `${property.area_supply_m2}㎡ / ${property.area_private_m2}㎡`;
+  return `${property.area_supply_m2.toFixed(1)}㎡ / ${property.area_private_m2.toFixed(1)}㎡`;
+}
+
+type PropertyMapSheetHeaderActionsProps = {
+  sourceUrl: string;
+  onOpenDetail: () => void;
+};
+
+function PropertyMapSheetHeaderActions({ sourceUrl, onOpenDetail }: PropertyMapSheetHeaderActionsProps) {
+  return (
+    <div className="flex items-center gap-2.5">
+      <button
+        type="button"
+        className="inline-flex items-center gap-1 text-[13px] font-medium text-emerald-600 transition hover:text-emerald-700 active:opacity-70"
+        onClick={onOpenDetail}
+      >
+        <FileText className="h-3.5 w-3.5" strokeWidth={2.25} />
+        <span>상세</span>
+      </button>
+      <a
+        href={sourceUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-1 text-[13px] font-medium text-slate-500 transition hover:text-slate-700 active:opacity-70"
+      >
+        <ExternalLink className="h-3.5 w-3.5" strokeWidth={2.25} />
+        <span>원본</span>
+      </a>
+    </div>
+  );
 }
 
 type DetailRowProps = {
@@ -164,12 +184,10 @@ function DetailRow({ label, value }: DetailRowProps) {
 
 type PropertyMapDetailProps = {
   property: PropertyRecord;
-  onClose: () => void;
-  onOpenDetail: () => void;
 };
 
-function PropertyMapDetail({ property, onClose, onOpenDetail }: PropertyMapDetailProps) {
-  const ratingAvg = averageRating(property);
+function PropertyMapDetail({ property }: PropertyMapDetailProps) {
+  const ratingAvg = getPropertyAverageRating(property);
   const priceGap =
     property.current_price_value != null && property.desired_price_value != null
       ? property.current_price_value - property.desired_price_value
@@ -220,37 +238,17 @@ function PropertyMapDetail({ property, onClose, onOpenDetail }: PropertyMapDetai
         <DetailRow label="기록자" value={property.actor_name} />
       </div>
 
-      {property.pros ? (
-        <div className="rounded-xl border border-slate-100 bg-white px-3 py-2.5">
-          <p className="text-[12px] font-semibold text-slate-500">장점</p>
-          <p className="mt-1 text-[13px] leading-relaxed text-slate-700">{property.pros}</p>
-        </div>
-      ) : null}
-
-      {property.cons ? (
-        <div className="rounded-xl border border-slate-100 bg-white px-3 py-2.5">
-          <p className="text-[12px] font-semibold text-slate-500">단점</p>
-          <p className="mt-1 text-[13px] leading-relaxed text-slate-700">{property.cons}</p>
-        </div>
-      ) : null}
-
-      <div className="grid grid-cols-2 gap-2">
-        <Button variant="primary" className="w-full" onClick={onOpenDetail}>
-          상세 보기
-        </Button>
-        <a
-          href={property.source_url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="toss-button-surface flex w-full items-center justify-center gap-1.5 text-[13px] font-semibold"
-        >
-          <ExternalLink className="h-4 w-4" />
-          원본 보기
-        </a>
+      <div className="rounded-xl border border-slate-100 bg-white px-3 py-2.5">
+        <p className="mb-2 text-[12px] font-semibold text-slate-500">항목별 평가</p>
+        <PropertyRatingSummary property={property} />
       </div>
-      <Button variant="surface" className="w-full border-slate-200" onClick={onClose}>
-        닫기
-      </Button>
+
+      {property.memo ? (
+        <div className="rounded-xl border border-slate-100 bg-white px-3 py-2.5">
+          <p className="text-[12px] font-semibold text-slate-500">메모</p>
+          <p className="mt-1 text-[13px] leading-relaxed text-slate-700">{property.memo}</p>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -401,9 +399,16 @@ export function PropertyMapWithSheet({
       <BottomSheet
         open={Boolean(selectedProperty)}
         onClose={() => setSelectedId(null)}
+        layout="inset"
         title={selectedProperty?.title ?? "매물 정보"}
-        snapPoints={[0, 0.55, 0.92]}
-        initialSnap={1}
+        headerLeading={
+          selectedProperty ? (
+            <PropertyMapSheetHeaderActions
+              sourceUrl={selectedProperty.source_url}
+              onOpenDetail={() => navigate(`/properties/${selectedProperty.id}`)}
+            />
+          ) : null
+        }
       >
         {selectedProperty ? (
           <>
@@ -412,11 +417,7 @@ export function PropertyMapWithSheet({
               selectedId={selectedProperty.id}
               onSelect={handleSelectProperty}
             />
-            <PropertyMapDetail
-              property={selectedProperty}
-              onClose={() => setSelectedId(null)}
-              onOpenDetail={() => navigate(`/properties/${selectedProperty.id}`)}
-            />
+            <PropertyMapDetail property={selectedProperty} />
           </>
         ) : null}
       </BottomSheet>
