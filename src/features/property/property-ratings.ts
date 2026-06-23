@@ -3,8 +3,6 @@
  * @description 매물 별점 항목 정의와 평균·필터 판별 유틸.
  */
 import type { PropertyRecord } from "../../types/property";
-
-/** DB 컬럼에 매핑되는 별점 항목 키 */
 export type PropertyRatingKey = "rating_location" | "rating_price" | "rating_condition";
 
 export type PropertyRatingItem = {
@@ -85,6 +83,13 @@ export function getPropertyAverageRating(property: PropertyRecord): number | nul
  */
 export function hasAnyPropertyRating(property: PropertyRecord): boolean {
   return getPropertyRatingValues(property).length > 0;
+}
+
+/** 메모·장단점 등 평가 코멘트가 있는지 확인한다. */
+export function hasPropertyEvaluationComment(property: PropertyRecord): boolean {
+  return [property.memo, property.pros, property.cons].some(
+    (value) => typeof value === "string" && value.trim().length > 0,
+  );
 }
 
 /**

@@ -10,9 +10,9 @@ import { formatPriceManwon, formatWon } from "../lib/format";
 type PriceDisplaySize = "sm" | "md" | "lg";
 
 const sizeClass: Record<PriceDisplaySize, string> = {
-  sm: "text-[15px] font-semibold tracking-tight",
-  md: "text-[22px] font-bold tracking-tight",
-  lg: "text-[26px] font-extrabold tracking-tight leading-none",
+  sm: "text-[15px] font-medium tracking-tight",
+  md: "text-[22px] font-medium tracking-tight",
+  lg: "text-[26px] font-semibold tracking-tight leading-none",
 };
 
 type PriceDisplayProps = {

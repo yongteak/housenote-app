@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
 
@@ -9,9 +9,24 @@ import { Button } from "../../components/ui/Button";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { NavBar } from "../../components/ui/NavBar";
 import { PriceDisplay } from "../../components/PriceDisplay";
+import {
+  applyPropertyListFilters,
+  clampFiltersToScope,
+  deriveScopedFilterOptions,
+  MapViewFloatingButton,
+  PropertyListFilterControls,
+  PropertyListFilterSheets,
+  PropertyMapViewOverlay,
+  propertyStatusLabel,
+  type FilterSheet,
+} from "../../features/property/property-list-filter-ui";
 import { cn } from "../../lib/cn";
 import { formatDate } from "../../lib/format";
-import type { DecisionStatus, PropertyRecord } from "../../types/property";
+import {
+  DEFAULT_PROPERTY_LIST_FILTERS,
+  type PropertyListFilterState,
+} from "../../lib/property-list-filter-storage";
+import type { PropertyRecord } from "../../types/property";
 
 export type ActivityPropertyRow = {
   id: string;
@@ -28,17 +43,6 @@ type ActivityPropertyListPageProps = {
   footer?: ReactNode;
 };
 
-const statusLabelMap: Record<DecisionStatus, string> = {
-  review: "다시보기",
-  hold: "보류",
-  exclude: "제외",
-  revisit: "재방문",
-};
-
-function statusLabel(status: DecisionStatus): string {
-  return statusLabelMap[status] ?? "검토";
-}
-
 export function ActivityPropertyListPage({
   title,
   rows,
@@ -47,6 +51,55 @@ export function ActivityPropertyListPage({
   footer,
 }: ActivityPropertyListPageProps) {
   const navigate = useNavigate();
+  const [filters, setFilters] = useState<PropertyListFilterState>(DEFAULT_PROPERTY_LIST_FILTERS);
+  const [openSheet, setOpenSheet] = useState<FilterSheet>(null);
+
+  const sourceProperties = useMemo(() => rows.map((row) => row.property), [rows]);
+
+  /** 이 화면 rows 에 포함된 매물만 기준으로 필터·지도 마커를 구성한다. */
+  const scopedFilterOptions = useMemo(() => deriveScopedFilterOptions(sourceProperties), [sourceProperties]);
+
+  useEffect(() => {
+    setFilters((current) => clampFiltersToScope(current, scopedFilterOptions));
+  }, [scopedFilterOptions]);
+
+  const filteredProperties = useMemo(
+    () => applyPropertyListFilters(sourceProperties, filters.visited, filters.status, filters.rating),
+    [filters.rating, filters.status, filters.visited, sourceProperties],
+  );
+
+  const filteredPropertyIds = useMemo(
+    () => new Set(filteredProperties.map((property) => property.id)),
+    [filteredProperties],
+  );
+
+  const visibleRows = useMemo(
+    () => rows.filter((row) => filteredPropertyIds.has(row.property.id)),
+    [filteredPropertyIds, rows],
+  );
+
+  const filterSheets = (
+    <PropertyListFilterSheets
+      openSheet={openSheet}
+      filters={filters}
+      onClose={() => setOpenSheet(null)}
+      onFiltersChange={setFilters}
+      filterOptions={scopedFilterOptions}
+    />
+  );
+
+  if (filters.viewMode === "map") {
+    return (
+      <PropertyMapViewOverlay
+        properties={sourceProperties}
+        filters={filters}
+        onClose={() => setFilters((current) => ({ ...current, viewMode: "list" }))}
+        onOpenSheet={setOpenSheet}
+        filterSheets={filterSheets}
+        filterOptions={scopedFilterOptions}
+      />
+    );
+  }
 
   return (
     <div className="flex min-h-dvh flex-col bg-white">
@@ -62,19 +115,35 @@ export function ActivityPropertyListPage({
           />
         }
       />
-      <main className="flex flex-1 flex-col px-4 pb-6 pt-2">
+      {rows.length > 0 ? (
+        <div className="border-b border-slate-100 py-2">
+          <div className="property-map-filter-scroll property-map-filter-scroll--center px-4">
+            <PropertyListFilterControls
+              layout="scrollable"
+              flat
+              centered
+              visitedFilter={filters.visited}
+              statusFilter={filters.status}
+              ratingFilter={filters.rating}
+              onOpenSheet={setOpenSheet}
+              filterOptions={scopedFilterOptions}
+            />
+          </div>
+        </div>
+      ) : null}
+      <main className="flex flex-1 flex-col px-4 pb-24 pt-2">
         {rows.length === 0 ? (
           <EmptyState title={emptyTitle} description={emptyDescription} />
+        ) : visibleRows.length === 0 ? (
+          <EmptyState title="조건에 맞는 매물이 없어요." description="필터를 바꿔 다시 확인해 보세요." />
         ) : (
-          <>
-            <p className="mb-2 px-1 text-[12px] font-medium text-slate-500">총 {rows.length}건</p>
-            <div className="divide-y divide-slate-100">
-              {rows.map((row) => (
-                <div key={row.id} className="relative flex gap-2 py-4">
-                  <Link
-                    to={`/properties/${row.property.id}`}
-                    className="flex min-w-0 flex-1 gap-4 transition active:opacity-80"
-                  >
+          <div className="divide-y divide-slate-100">
+            {visibleRows.map((row) => (
+              <div key={row.id} className="relative flex gap-2 py-4">
+                <Link
+                  to={`/properties/${row.property.id}`}
+                  className="flex min-w-0 flex-1 gap-4 transition active:opacity-80"
+                >
                   <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-slate-100 bg-slate-50">
                     {row.property.thumbnail_url ? (
                       <img
@@ -92,7 +161,7 @@ export function ActivityPropertyListPage({
                       <PriceDisplay
                         value={row.property.current_price_value}
                         size="sm"
-                        className="shrink-0 text-[15px] font-bold text-emerald-600"
+                        className="shrink-0 text-emerald-600"
                         stopPropagation
                       />
                     </div>
@@ -120,20 +189,25 @@ export function ActivityPropertyListPage({
                           row.property.decision_status === "exclude" && "bg-rose-50 text-rose-700",
                         )}
                       >
-                        {statusLabel(row.property.decision_status)}
+                        {propertyStatusLabel(row.property.decision_status)}
                       </span>
                       <PropertyRatingSummary property={row.property} compact />
                     </div>
                   </div>
-                  </Link>
-                  <FavoriteButton propertyId={row.property.id} className="self-start" />
-                </div>
-              ))}
-            </div>
-          </>
+                </Link>
+                <FavoriteButton propertyId={row.property.id} className="self-start" />
+              </div>
+            ))}
+          </div>
         )}
         {footer}
       </main>
+
+      {sourceProperties.length > 0 ? (
+        <MapViewFloatingButton onClick={() => setFilters((current) => ({ ...current, viewMode: "map" }))} />
+      ) : null}
+
+      {filterSheets}
     </div>
   );
 }

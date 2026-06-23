@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 
-import { getMockProperties, getMockRatedItems } from "../../fixtures/mobile-mvp-ui-mock";
+import { createActivityPropertyLookup } from "../../features/activity/activity-property-lookup";
+import { getMockRatedItems } from "../../fixtures/mobile-mvp-ui-mock";
 import { useAuth } from "../../lib/auth-context";
 import { ActivityPropertyListPage, buildMeta } from "./ActivityPropertyListPage";
 
@@ -8,11 +9,10 @@ export function RatedItemsPage() {
   const { actor } = useAuth();
 
   const rows = useMemo(() => {
-    const properties = getMockProperties(actor);
-    const byId = new Map(properties.map((property) => [property.id, property]));
+    const lookup = createActivityPropertyLookup(actor);
     return getMockRatedItems(actor)
       .map((rated) => {
-        const property = byId.get(rated.property_id);
+        const property = lookup.resolve(rated.property_id);
         if (!property) return null;
         return {
           id: rated.id,

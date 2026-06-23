@@ -232,7 +232,7 @@ function PropertyMapDetail({ property, onOpenDetail }: PropertyMapDetailProps) {
       <div className="rounded-xl border border-slate-100 bg-slate-50 px-3.5 py-2.5">
         <div className="flex items-center justify-between">
           <span className="text-[12px] font-medium text-slate-500">등록가</span>
-          <PriceDisplay value={property.current_price_value} size="md" className="font-bold text-slate-950" />
+          <PriceDisplay value={property.current_price_value} size="md" className="text-slate-950" />
         </div>
       </div>
 

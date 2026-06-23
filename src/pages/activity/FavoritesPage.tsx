@@ -1,10 +1,8 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 
+import { createActivityPropertyLookup } from "../../features/activity/activity-property-lookup";
 import { listFavorites } from "../../features/property/property-favorites.api";
-import { resolveLocalProperty } from "../../features/property/property.api";
-import { listCompletedQueuePropertiesForHome } from "../../features/property/property-crawl.api";
-import { getMockProperties } from "../../fixtures/mobile-mvp-ui-mock";
 import { useAuth } from "../../lib/auth-context";
 import { ActivityPropertyListPage, buildMeta } from "./ActivityPropertyListPage";
 
@@ -22,18 +20,11 @@ export function FavoritesPage() {
       return [];
     }
 
-    const propertyById = new Map<string, ReturnType<typeof resolveLocalProperty>>();
-    for (const property of [
-      ...listCompletedQueuePropertiesForHome(actor),
-      ...getMockProperties(actor),
-    ]) {
-      propertyById.set(property.id, property);
-    }
+    const lookup = createActivityPropertyLookup(actor);
 
     return favoritesQuery.data
       .map((favorite) => {
-        const property =
-          propertyById.get(favorite.property_id) ?? resolveLocalProperty(favorite.property_id, actor);
+        const property = lookup.resolve(favorite.property_id);
         if (!property) {
           return null;
         }

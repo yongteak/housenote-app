@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 
-import { getMockProperties, getMockRecentViews } from "../../fixtures/mobile-mvp-ui-mock";
+import { createActivityPropertyLookup } from "../../features/activity/activity-property-lookup";
+import { getMockRecentViews } from "../../fixtures/mobile-mvp-ui-mock";
 import { useAuth } from "../../lib/auth-context";
 import { ActivityPropertyListPage, buildMeta } from "./ActivityPropertyListPage";
 
@@ -8,11 +9,10 @@ export function RecentViewsPage() {
   const { actor } = useAuth();
 
   const rows = useMemo(() => {
-    const properties = getMockProperties(actor);
-    const byId = new Map(properties.map((property) => [property.id, property]));
+    const lookup = createActivityPropertyLookup(actor);
     return getMockRecentViews(actor)
       .map((recent) => {
-        const property = byId.get(recent.property_id);
+        const property = lookup.resolve(recent.property_id);
         if (!property) return null;
         return {
           id: recent.id,
