@@ -437,8 +437,8 @@ export function PropertyDetailPage() {
                     rel="noopener noreferrer"
                     className="inline-flex shrink-0 cursor-pointer items-center gap-0.5 pt-0.5 text-[12px] font-medium text-slate-400 transition hover:text-slate-600 active:opacity-70"
                   >
+                    <span>네이버 부동산</span>
                     <ExternalLink className="h-3 w-3" strokeWidth={2.25} />
-                    <span>원본</span>
                   </a>
                 ) : null}
               </div>

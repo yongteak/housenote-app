@@ -1,11 +1,10 @@
 /**
  * @file PropertyLocationMap.tsx
- * @description 크롤 좌표 기준 OpenStreetMap + Leaflet 미리보기 (iframe 없음).
+ * @description 크롤 좌표 기준 OpenStreetMap + Leaflet 미리보기. 클릭 시 네이버 원본 링크로 이동.
  */
 import { useMemo } from "react";
 import L from "leaflet";
-import { MapContainer, Marker, TileLayer } from "react-leaflet";
-import ExternalLink from "lucide-react/dist/esm/icons/external-link";
+import { MapContainer, Marker, TileLayer, useMapEvents } from "react-leaflet";
 
 import { resolveMapZoom } from "../../lib/property-map";
 import type { PropertyCrawlPayload } from "../../types/property-crawl";
@@ -23,6 +22,15 @@ type PropertyLocationMapProps = {
   crawl: PropertyCrawlPayload;
 };
 
+function OpenSourceOnMapClick({ url }: { url: string }) {
+  useMapEvents({
+    click: () => {
+      window.open(url, "_blank", "noopener,noreferrer");
+    },
+  });
+  return null;
+}
+
 export function PropertyLocationMap({ crawl }: PropertyLocationMapProps) {
   const latitude = crawl.latitude;
   const longitude = crawl.longitude;
@@ -34,10 +42,12 @@ export function PropertyLocationMap({ crawl }: PropertyLocationMapProps) {
     [latitude, longitude],
   );
 
-  if (!center || !sourceUrl) return null;
+  if (!center || !sourceUrl) {
+    return null;
+  }
 
   return (
-    <div className="property-location-map overflow-hidden rounded-xl border border-slate-200/80 bg-slate-50">
+    <div className="property-location-map overflow-hidden rounded-xl border border-slate-200/80 bg-slate-50 [&_.leaflet-container]:cursor-pointer">
       <MapContainer
         center={center}
         zoom={zoom}
@@ -53,19 +63,8 @@ export function PropertyLocationMap({ crawl }: PropertyLocationMapProps) {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         />
         <Marker position={center} icon={markerIcon} />
+        <OpenSourceOnMapClick url={sourceUrl} />
       </MapContainer>
-      <div className="flex items-center justify-between border-t border-slate-200/60 bg-white px-3 py-2">
-        <span className="text-[11px] font-medium text-slate-400">위치 미리보기 · 줌 {zoom}</span>
-        <a
-          href={sourceUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-500 hover:text-slate-700"
-        >
-          크게 보기
-          <ExternalLink className="h-3 w-3" />
-        </a>
-      </div>
     </div>
   );
 }
