@@ -4,6 +4,7 @@
  */
 import type { PropertyFormValues, PropertyRecord } from "../../types/property";
 import type { PropertyCrawlPayload } from "../../types/property-crawl";
+import { getPropertyCrawlKind } from "../../types/property-crawl-kind";
 
 /**
  * DB 레코드에서 크롤 미리보기·지도용 페이로드를 복원한다.
@@ -11,6 +12,7 @@ import type { PropertyCrawlPayload } from "../../types/property-crawl";
  */
 export function recordToCrawlPayload(record: PropertyRecord): PropertyCrawlPayload {
   const metadata = (record.metadata ?? {}) as PropertyCrawlPayload["metadata"];
+  const crawlKind = getPropertyCrawlKind(record);
 
   return {
     source_url: record.source_url,
@@ -31,7 +33,10 @@ export function recordToCrawlPayload(record: PropertyRecord): PropertyCrawlPaylo
     direction: record.direction ?? undefined,
     thumbnail_url: record.thumbnail_url,
     image_urls: record.image_urls ?? [],
-    metadata,
+    metadata: {
+      ...metadata,
+      crawlKind,
+    },
   };
 }
 

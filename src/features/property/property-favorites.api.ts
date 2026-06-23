@@ -3,74 +3,37 @@
  * @description 매물 즐겨찾기 toggle·목록.
  * 모든 매물 목록/상세에서 FavoriteButton 이 이 API 를 호출한다.
  */
-import { getMockFavorites } from "../../fixtures/mobile-mvp-ui-mock";
-import {
-  addStoredFavorite,
-  isStoredFavorite,
-  listStoredFavorites,
-  removeStoredFavorite,
-  replaceStoredFavorites,
-} from "../../lib/property-favorites.storage";
-import { isSupabaseConfigured } from "../../lib/supabase";
+import { isSupabaseConfigured, supabase } from "../../lib/supabase";
 import type { PropertyFavoriteRecord, SelectedActor } from "../../types/property";
 
-let seeded = false;
-
-/** 최초 1회 mock 즐겨찾기를 storage 에 복사 (데모 데이터) */
-function seedFromMockIfEmpty(actor: SelectedActor) {
-  if (seeded) {
-    return;
+function assertSupabaseConfigured() {
+  if (!isSupabaseConfigured()) {
+    throw new Error("Supabase 환경변수(VITE_SUPABASE_*)를 먼저 설정해주세요.");
   }
-  seeded = true;
-
-  if (listStoredFavorites(actor.actorId).length > 0) {
-    return;
-  }
-
-  const mock = getMockFavorites(actor);
-  if (mock.length === 0) {
-    return;
-  }
-
-  const existing = listStoredFavorites(actor.actorId);
-  replaceStoredFavorites([...mock, ...existing]);
 }
 
 export async function listFavorites(actor: SelectedActor): Promise<PropertyFavoriteRecord[]> {
-  seedFromMockIfEmpty(actor);
-
-  if (!isSupabaseConfigured()) {
-    return listStoredFavorites(actor.actorId);
+  assertSupabaseConfigured();
+  const { data, error } = await supabase.rpc("hnote_list_favorites", {
+    p_actor_id: actor.actorId,
+  });
+  if (error || !data) {
+    throw new Error(error?.message ?? "즐겨찾기 목록 조회에 실패했습니다.");
   }
-
-  // TODO: Supabase property_favorites 테이블 연동
-  return listStoredFavorites(actor.actorId);
-}
-
-export async function isFavorite(actor: SelectedActor, propertyId: string): Promise<boolean> {
-  await listFavorites(actor);
-  return isStoredFavorite(actor.actorId, propertyId);
+  return data as PropertyFavoriteRecord[];
 }
 
 /** toggle 후 새 즐겨찾기 여부 반환 */
 export async function toggleFavorite(actor: SelectedActor, propertyId: string): Promise<boolean> {
-  seedFromMockIfEmpty(actor);
-
-  const favorited = isStoredFavorite(actor.actorId, propertyId);
-
-  if (favorited) {
-    removeStoredFavorite(actor.actorId, propertyId);
-    return false;
-  }
-
-  addStoredFavorite({
-    id: crypto.randomUUID(),
-    actor_id: actor.actorId,
-    property_id: propertyId,
-    created_at: new Date().toISOString(),
+  assertSupabaseConfigured();
+  const { data, error } = await supabase.rpc("hnote_toggle_favorite", {
+    p_actor_id: actor.actorId,
+    p_property_id: propertyId,
   });
-
-  return true;
+  if (error) {
+    throw new Error(error.message);
+  }
+  return Boolean(data);
 }
 
 export function getFavoritePropertyIds(actor: SelectedActor | null, favorites: PropertyFavoriteRecord[]): Set<string> {

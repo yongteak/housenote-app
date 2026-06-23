@@ -6,13 +6,10 @@ import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
 
 import { Button } from "../components/ui/Button";
 import { NavBar } from "../components/ui/NavBar";
-import {
-  getMockProperties,
-  getMockRatedItems,
-  getMockRecentViews,
-  getMockVisitHistory,
-} from "../fixtures/mobile-mvp-ui-mock";
+import { listRecentViews } from "../features/activity/property-recent-views.api";
 import { listFavorites } from "../features/property/property-favorites.api";
+import { listProperties } from "../features/property/property.api";
+import { hasAnyPropertyRating } from "../features/property/property-ratings";
 import { useAuth } from "../lib/auth-context";
 
 type ActivityEntry = {
@@ -32,14 +29,31 @@ export function ActivityPage() {
     enabled: Boolean(actor),
   });
 
+  const propertiesQuery = useQuery({
+    queryKey: ["properties", "activity", actor?.actorId],
+    queryFn: () =>
+      listProperties({
+        actorId: actor?.actorId,
+        visited: "all",
+        decisionStatus: "all",
+      }),
+    enabled: Boolean(actor),
+  });
+
+  const recentViewsQuery = useQuery({
+    queryKey: ["recent-views", actor?.actorId],
+    queryFn: () => listRecentViews(actor!),
+    enabled: Boolean(actor),
+  });
+
   const entries = useMemo<ActivityEntry[]>(() => {
-    const properties = getMockProperties(actor);
+    const properties = propertiesQuery.data ?? [];
     return [
       {
         to: "/activity/history",
         title: "과거 작성 히스토리",
         description: "방문일과 메모가 기록된 매물",
-        count: Math.max(getMockVisitHistory(actor).length, properties.filter((property) => property.visited).length),
+        count: properties.filter((property) => property.visited).length,
       },
       {
         to: "/activity/favorites",
@@ -51,16 +65,16 @@ export function ActivityPage() {
         to: "/activity/recent",
         title: "최근 본 항목",
         description: "최근에 열어본 매물",
-        count: getMockRecentViews(actor).length,
+        count: recentViewsQuery.data?.length ?? 0,
       },
       {
         to: "/activity/ratings",
         title: "평가한 항목",
         description: "별점을 남긴 매물",
-        count: getMockRatedItems(actor).length,
+        count: properties.filter((property) => hasAnyPropertyRating(property)).length,
       },
     ];
-  }, [actor, favoritesQuery.data]);
+  }, [favoritesQuery.data, propertiesQuery.data, recentViewsQuery.data]);
 
   return (
     <div className="flex min-h-dvh flex-col bg-white">

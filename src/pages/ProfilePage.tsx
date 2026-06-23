@@ -8,8 +8,9 @@ import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
 import { ActorAvatar } from "../components/actor/ActorAvatar";
 import { Button } from "../components/ui/Button";
 import { NavBar } from "../components/ui/NavBar";
+import { listRecentViews } from "../features/activity/property-recent-views.api";
 import { listFavorites } from "../features/property/property-favorites.api";
-import { getMockProperties, getMockRecentViews, getMockVisitHistory } from "../fixtures/mobile-mvp-ui-mock";
+import { listProperties } from "../features/property/property.api";
 import { useAuth } from "../lib/auth-context";
 
 type StatItem = {
@@ -28,15 +29,32 @@ export function ProfilePage() {
     enabled: Boolean(actor),
   });
 
+  const propertiesQuery = useQuery({
+    queryKey: ["properties", "profile", actor?.actorId],
+    queryFn: () =>
+      listProperties({
+        actorId: actor?.actorId,
+        visited: "all",
+        decisionStatus: "all",
+      }),
+    enabled: Boolean(actor),
+  });
+
+  const recentViewsQuery = useQuery({
+    queryKey: ["recent-views", actor?.actorId],
+    queryFn: () => listRecentViews(actor!),
+    enabled: Boolean(actor),
+  });
+
   const summary = useMemo(() => {
-    const properties = getMockProperties(actor);
+    const properties = propertiesQuery.data ?? [];
     return {
       total: properties.length,
-      visited: getMockVisitHistory(actor).length,
+      visited: properties.filter((property) => property.visited).length,
       favorites: favoritesQuery.data?.length ?? 0,
-      recent: getMockRecentViews(actor).length,
+      recent: recentViewsQuery.data?.length ?? 0,
     };
-  }, [actor, favoritesQuery.data]);
+  }, [favoritesQuery.data, propertiesQuery.data, recentViewsQuery.data]);
 
   const stats = useMemo<StatItem[]>(
     () => [

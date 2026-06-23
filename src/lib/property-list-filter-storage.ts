@@ -26,7 +26,7 @@ export const DEFAULT_PROPERTY_LIST_FILTERS: PropertyListFilterState = {
   viewMode: "list",
 };
 
-const FILTER_STORAGE_KEY = "balpoom:property-list-filters";
+const FILTER_STORAGE_KEY = "hnote:property-list-filters";
 
 function isVisitedFilterValue(value: unknown): value is VisitedFilterValue {
   return value === "all" || value === "yes" || value === "no";

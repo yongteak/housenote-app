@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { createActivityPropertyLookup } from "../../features/activity/activity-property-lookup";
 import { listFavorites } from "../../features/property/property-favorites.api";
+import { listProperties } from "../../features/property/property.api";
 import { useAuth } from "../../lib/auth-context";
 import { ActivityPropertyListPage, buildMeta } from "./ActivityPropertyListPage";
 
@@ -15,12 +16,23 @@ export function FavoritesPage() {
     enabled: Boolean(actor),
   });
 
+  const propertiesQuery = useQuery({
+    queryKey: ["properties", "activity-favorites", actor?.actorId],
+    queryFn: () =>
+      listProperties({
+        actorId: actor?.actorId,
+        visited: "all",
+        decisionStatus: "all",
+      }),
+    enabled: Boolean(actor),
+  });
+
   const rows = useMemo(() => {
     if (!favoritesQuery.data) {
       return [];
     }
 
-    const lookup = createActivityPropertyLookup(actor);
+    const lookup = createActivityPropertyLookup(propertiesQuery.data ?? []);
 
     return favoritesQuery.data
       .map((favorite) => {
@@ -36,7 +48,7 @@ export function FavoritesPage() {
         };
       })
       .filter((row): row is NonNullable<typeof row> => Boolean(row));
-  }, [actor, favoritesQuery.data]);
+  }, [favoritesQuery.data, propertiesQuery.data]);
 
   return (
     <ActivityPropertyListPage

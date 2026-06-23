@@ -5,51 +5,21 @@
 import { isSupabaseConfigured, supabase } from "../../lib/supabase";
 import type { FixedActor, SelectedActor } from "../../types/property";
 
-/** Supabase schema 이름 */
-const BALPOOM_SCHEMA = "balpoom";
-
-/** 데모 모드 기본 저장자 */
-const FALLBACK_ACTORS: FixedActor[] = [
-  { id: "actor-1111", phone_suffix: "1111", display_name: "아빠", is_active: true },
-  { id: "actor-2222", phone_suffix: "2222", display_name: "엄마", is_active: true },
-];
-
-/**
- * 데모 저장자 목록에서 전화번호 뒷자리로 세션 정보를 만든다.
- * @param phoneSuffix 허용 ID (1111 또는 2222)
- */
-function findFallbackActor(phoneSuffix: string): SelectedActor | null {
-  const actor = FALLBACK_ACTORS.find(
-    (item) => item.phone_suffix === phoneSuffix && item.is_active,
-  );
-  if (!actor) {
-    return null;
+function assertSupabaseConfigured() {
+  if (!isSupabaseConfigured()) {
+    throw new Error("Supabase 환경변수(VITE_SUPABASE_*)를 먼저 설정해주세요.");
   }
-
-  return {
-    actorId: actor.id,
-    phoneSuffix: actor.phone_suffix,
-    actorName: actor.display_name,
-  };
 }
 
 /**
  * 활성 저장자 목록을 조회한다.
  */
 export async function fetchFixedActors(): Promise<FixedActor[]> {
-  if (!isSupabaseConfigured()) {
-    return FALLBACK_ACTORS;
-  }
+  assertSupabaseConfigured();
 
-  const { data, error } = await supabase
-    .schema(BALPOOM_SCHEMA)
-    .from("fixed_actors")
-    .select("id, phone_suffix, display_name, is_active")
-    .eq("is_active", true)
-    .order("phone_suffix", { ascending: true });
-
-  if (error || !data || data.length === 0) {
-    return FALLBACK_ACTORS;
+  const { data, error } = await supabase.rpc("hnote_list_fixed_actors");
+  if (error || !data) {
+    throw new Error(error?.message ?? "저장자 목록을 불러오지 못했습니다.");
   }
 
   return data as FixedActor[];
@@ -60,21 +30,11 @@ export async function fetchFixedActors(): Promise<FixedActor[]> {
  * @param phoneSuffix 허용 ID (1111 또는 2222)
  */
 export async function authenticateByPhoneSuffix(phoneSuffix: string): Promise<SelectedActor> {
-  if (!isSupabaseConfigured()) {
-    const fallbackActor = findFallbackActor(phoneSuffix);
-    if (!fallbackActor) {
-      throw new Error("저장자 정보를 찾을 수 없습니다.");
-    }
-    return fallbackActor;
-  }
+  assertSupabaseConfigured();
 
-  const { data, error } = await supabase
-    .schema(BALPOOM_SCHEMA)
-    .from("fixed_actors")
-    .select("id, phone_suffix, display_name, is_active")
-    .eq("phone_suffix", phoneSuffix)
-    .eq("is_active", true)
-    .maybeSingle();
+  const { data, error } = await supabase.rpc("hnote_get_actor_by_phone_suffix", {
+    p_phone_suffix: phoneSuffix,
+  });
 
   if (error || !data) {
     throw new Error(error?.message ?? "저장자 정보를 찾을 수 없습니다.");

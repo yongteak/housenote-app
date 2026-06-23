@@ -12,6 +12,9 @@ import {
   formatVerificationDate,
 } from "../../lib/area-format";
 import type { PropertyCrawlPayload } from "../../types/property-crawl";
+import { isComplexCrawl } from "../../types/property-crawl-kind";
+
+import { ComplexPropertyInfo } from "./ComplexPropertyInfo";
 
 import MapPin from "lucide-react/dist/esm/icons/map-pin";
 
@@ -97,7 +100,59 @@ function InfoRow({
   );
 }
 
-export function PropertyCrawlPreview({ crawl }: PropertyCrawlPreviewProps) {
+function ComplexPropertyCrawlPreview({ crawl }: PropertyCrawlPreviewProps) {
+  return (
+    <div className="space-y-4">
+      <article className="toss-card border-slate-200/80 space-y-3 bg-white p-5">
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="inline-flex items-center rounded-md bg-slate-50 border border-slate-200/40 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
+            단지
+          </span>
+          <span className="inline-flex items-center rounded-md bg-slate-50 border border-slate-200/40 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
+            {crawl.property_type ?? "아파트"}
+          </span>
+          {crawl.deal_type ? (
+            <span className="inline-flex items-center rounded-md bg-slate-50 border border-slate-200/40 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
+              {crawl.deal_type}
+            </span>
+          ) : null}
+        </div>
+        <div className="space-y-1">
+          <h2 className="text-[19px] font-bold text-slate-900 tracking-tight leading-tight">{crawl.title}</h2>
+          <div className="flex items-center gap-1 text-[13px] text-slate-400 font-medium">
+            <MapPin className="h-3.5 w-3.5 shrink-0" />
+            <span className="truncate">{crawl.address}</span>
+          </div>
+        </div>
+        {crawl.current_price_value != null ? (
+          <div className="pt-1.5 border-t border-slate-100 flex items-baseline justify-between">
+            <span className="text-[13px] font-semibold text-slate-400 uppercase tracking-wider">최근 실거래</span>
+            <PriceDisplay value={crawl.current_price_value} size="lg" className="text-slate-950" />
+          </div>
+        ) : null}
+      </article>
+      <ComplexPropertyInfo crawl={crawl} />
+      <Suspense
+        fallback={
+          <div className="h-44 animate-pulse rounded-xl border border-slate-200/80 bg-slate-100" />
+        }
+      >
+        <PropertyLocationMap crawl={crawl} />
+      </Suspense>
+      <a
+        href={crawl.source_url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 py-3.5 text-[13px] font-semibold text-slate-700 transition active:bg-slate-100"
+      >
+        <ExternalLink className="h-4 w-4" />
+        <span>네이버 부동산에서 원본 링크 열기</span>
+      </a>
+    </div>
+  );
+}
+
+function ArticlePropertyCrawlPreview({ crawl }: PropertyCrawlPreviewProps) {
   const [areaUnit, setAreaUnit] = useState<AreaUnit>("pyeong");
 
   const extras = crawl.metadata?.extras;
@@ -298,4 +353,11 @@ export function PropertyCrawlPreview({ crawl }: PropertyCrawlPreviewProps) {
       </a>
     </div>
   );
+}
+
+export function PropertyCrawlPreview({ crawl }: PropertyCrawlPreviewProps) {
+  if (isComplexCrawl(crawl)) {
+    return <ComplexPropertyCrawlPreview crawl={crawl} />;
+  }
+  return <ArticlePropertyCrawlPreview crawl={crawl} />;
 }

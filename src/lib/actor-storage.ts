@@ -5,7 +5,7 @@
 import type { SelectedActor } from "../types/property";
 
 /** 저장자 선택값 localStorage 키 */
-const ACTOR_STORAGE_KEY = "balpoom:selected-actor";
+const ACTOR_STORAGE_KEY = "hnote:selected-actor";
 
 /**
  * 현재 저장된 저장자 정보를 읽는다.

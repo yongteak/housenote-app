@@ -12,8 +12,6 @@ import { EmptyState } from "../components/ui/EmptyState";
 import { PriceDisplay } from "../components/PriceDisplay";
 import { PropertyRatingSummary } from "../components/PropertyRatingSummary";
 import { Button } from "../components/ui/Button";
-import { getMockProperties } from "../fixtures/mobile-mvp-ui-mock";
-import { listCompletedQueuePropertiesForHome } from "../features/property/property-crawl.api";
 import {
   applyPropertyListFilters,
   MapViewFloatingButton,
@@ -64,20 +62,9 @@ export function PropertyListPage() {
     enabled: Boolean(actor),
   });
 
-  const sourceProperties = useMemo<PropertyRecord[]>(() => {
-    if (query.data && query.data.length > 0) {
-      return query.data;
-    }
+  const sourceProperties = useMemo<PropertyRecord[]>(() => query.data ?? [], [query.data]);
 
-    const mock = getMockProperties(actor);
-    const queued = listCompletedQueuePropertiesForHome(actor);
-    const mockIds = new Set(mock.map((item) => item.id));
-    const merged = [...queued.filter((item) => !mockIds.has(item.id)), ...mock];
-    return merged;
-  }, [actor, query.data]);
-
-  const listFilters =
-    query.data && query.data.length > 0 ? filters : DEFAULT_PROPERTY_LIST_FILTERS;
+  const listFilters = sourceProperties.length > 0 ? filters : DEFAULT_PROPERTY_LIST_FILTERS;
 
   const filteredProperties = useMemo(
     () => applyPropertyListFilters(sourceProperties, listFilters.visited, listFilters.status, listFilters.rating),

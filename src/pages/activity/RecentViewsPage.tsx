@@ -1,16 +1,35 @@
 import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 import { createActivityPropertyLookup } from "../../features/activity/activity-property-lookup";
-import { getMockRecentViews } from "../../fixtures/mobile-mvp-ui-mock";
+import { listRecentViews } from "../../features/activity/property-recent-views.api";
+import { listProperties } from "../../features/property/property.api";
 import { useAuth } from "../../lib/auth-context";
 import { ActivityPropertyListPage, buildMeta } from "./ActivityPropertyListPage";
 
 export function RecentViewsPage() {
   const { actor } = useAuth();
 
+  const propertiesQuery = useQuery({
+    queryKey: ["properties", "activity-recent", actor?.actorId],
+    queryFn: () =>
+      listProperties({
+        actorId: actor?.actorId,
+        visited: "all",
+        decisionStatus: "all",
+      }),
+    enabled: Boolean(actor),
+  });
+
+  const recentViewsQuery = useQuery({
+    queryKey: ["recent-views", actor?.actorId],
+    queryFn: () => listRecentViews(actor!),
+    enabled: Boolean(actor),
+  });
+
   const rows = useMemo(() => {
-    const lookup = createActivityPropertyLookup(actor);
-    return getMockRecentViews(actor)
+    const lookup = createActivityPropertyLookup(propertiesQuery.data ?? []);
+    return (recentViewsQuery.data ?? [])
       .map((recent) => {
         const property = lookup.resolve(recent.property_id);
         if (!property) return null;
@@ -21,7 +40,7 @@ export function RecentViewsPage() {
         };
       })
       .filter((row): row is NonNullable<typeof row> => Boolean(row));
-  }, [actor]);
+  }, [propertiesQuery.data, recentViewsQuery.data]);
 
   return (
     <ActivityPropertyListPage

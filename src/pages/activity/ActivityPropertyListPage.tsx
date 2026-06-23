@@ -133,9 +133,17 @@ export function ActivityPropertyListPage({
       ) : null}
       <main className="flex flex-1 flex-col px-4 pb-24 pt-2">
         {rows.length === 0 ? (
-          <EmptyState title={emptyTitle} description={emptyDescription} />
+          <div className="flex flex-1 items-center justify-center py-6">
+            <EmptyState className="w-full" title={emptyTitle} description={emptyDescription} />
+          </div>
         ) : visibleRows.length === 0 ? (
-          <EmptyState title="조건에 맞는 매물이 없어요." description="필터를 바꿔 다시 확인해 보세요." />
+          <div className="flex flex-1 items-center justify-center py-6">
+            <EmptyState
+              className="w-full"
+              title="조건에 맞는 매물이 없어요."
+              description="필터를 바꿔 다시 확인해 보세요."
+            />
+          </div>
         ) : (
           <div className="divide-y divide-slate-100">
             {visibleRows.map((row) => (

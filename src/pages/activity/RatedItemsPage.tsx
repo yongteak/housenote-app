@@ -1,28 +1,40 @@
 import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 
-import { createActivityPropertyLookup } from "../../features/activity/activity-property-lookup";
-import { getMockRatedItems } from "../../fixtures/mobile-mvp-ui-mock";
+import { getPropertyAverageRating, hasAnyPropertyRating } from "../../features/property/property-ratings";
+import { listProperties } from "../../features/property/property.api";
 import { useAuth } from "../../lib/auth-context";
 import { ActivityPropertyListPage, buildMeta } from "./ActivityPropertyListPage";
 
 export function RatedItemsPage() {
   const { actor } = useAuth();
 
+  const propertiesQuery = useQuery({
+    queryKey: ["properties", "activity-rated", actor?.actorId],
+    queryFn: () =>
+      listProperties({
+        actorId: actor?.actorId,
+        visited: "all",
+        decisionStatus: "all",
+      }),
+    enabled: Boolean(actor),
+  });
+
   const rows = useMemo(() => {
-    const lookup = createActivityPropertyLookup(actor);
-    return getMockRatedItems(actor)
-      .map((rated) => {
-        const property = lookup.resolve(rated.property_id);
-        if (!property) return null;
+    return (propertiesQuery.data ?? [])
+      .filter((property) => hasAnyPropertyRating(property))
+      .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+      .map((property) => {
+        const ratingAvg = getPropertyAverageRating(property);
         return {
-          id: rated.id,
+          id: property.id,
           property,
-          meta: buildMeta("평가일", rated.rated_at),
-          badge: `평균 ${rated.rating_avg.toFixed(1)}점`,
+          meta: buildMeta("평가일", property.updated_at),
+          badge: ratingAvg != null ? `평균 ${ratingAvg.toFixed(1)}점` : undefined,
         };
       })
-      .filter((row): row is NonNullable<typeof row> => Boolean(row));
-  }, [actor]);
+      .filter((row) => Boolean(row.badge));
+  }, [propertiesQuery.data]);
 
   return (
     <ActivityPropertyListPage

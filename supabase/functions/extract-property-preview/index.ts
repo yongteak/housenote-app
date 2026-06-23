@@ -66,7 +66,7 @@ Deno.serve(async (request) => {
 
     const upstream = await fetch(targetUrl.toString(), {
       headers: {
-        "user-agent": "Mozilla/5.0 (compatible; balpoom-bot/1.0)",
+        "user-agent": "Mozilla/5.0 (compatible; hnote-bot/1.0)",
       },
     });
 

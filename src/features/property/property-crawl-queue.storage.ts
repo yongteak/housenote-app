@@ -10,7 +10,7 @@
 import type { PropertyRecord } from "../../types/property";
 import type { SelectedActor } from "../../types/property";
 
-const STORAGE_KEY = "balpoom:crawl-queue-properties";
+const STORAGE_KEY = "hnote:crawl-queue-properties";
 
 function readAll(): PropertyRecord[] {
   const raw = localStorage.getItem(STORAGE_KEY);

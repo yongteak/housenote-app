@@ -1,28 +1,38 @@
 import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 
-import { getMockProperties, getMockVisitHistory } from "../../fixtures/mobile-mvp-ui-mock";
+import { listProperties } from "../../features/property/property.api";
 import { useAuth } from "../../lib/auth-context";
 import { ActivityPropertyListPage, buildMeta } from "./ActivityPropertyListPage";
 
 export function HistoryPage() {
   const { actor } = useAuth();
 
+  const propertiesQuery = useQuery({
+    queryKey: ["properties", "activity-history", actor?.actorId],
+    queryFn: () =>
+      listProperties({
+        actorId: actor?.actorId,
+        visited: "all",
+        decisionStatus: "all",
+      }),
+    enabled: Boolean(actor),
+  });
+
   const rows = useMemo(() => {
-    const properties = getMockProperties(actor);
-    const byId = new Map(properties.map((property) => [property.id, property]));
-    return getMockVisitHistory(actor)
-      .map((history) => {
-        const property = byId.get(history.property_id);
-        if (!property) return null;
-        return {
-          id: history.id,
-          property,
-          meta: buildMeta("방문일", history.visited_at),
-          badge: history.note ?? undefined,
-        };
+    return (propertiesQuery.data ?? [])
+      .filter((property) => property.visited && property.visited_at)
+      .sort((a, b) => {
+        const left = a.visited_at ? new Date(a.visited_at).getTime() : 0;
+        const right = b.visited_at ? new Date(b.visited_at).getTime() : 0;
+        return right - left;
       })
-      .filter((row): row is NonNullable<typeof row> => Boolean(row));
-  }, [actor]);
+      .map((property) => ({
+        id: property.id,
+        property,
+        meta: buildMeta("방문일", property.visited_at!),
+      }));
+  }, [propertiesQuery.data]);
 
   return (
     <ActivityPropertyListPage

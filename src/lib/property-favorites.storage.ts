@@ -4,7 +4,7 @@
  */
 import type { PropertyFavoriteRecord } from "../types/property";
 
-const STORAGE_KEY = "balpoom:property-favorites";
+const STORAGE_KEY = "hnote:property-favorites";
 
 function readAll(): PropertyFavoriteRecord[] {
   const raw = localStorage.getItem(STORAGE_KEY);

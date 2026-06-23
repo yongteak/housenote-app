@@ -29,11 +29,10 @@ import { Button } from "../components/ui/Button";
 import { EmptyState } from "../components/ui/EmptyState";
 import { NavBar } from "../components/ui/NavBar";
 import { PriceDisplay } from "../components/PriceDisplay";
-import { getMockProperty } from "../fixtures/mobile-mvp-ui-mock";
-import { deleteProperty, getProperty, saveProperty } from "../features/property/property.api";
+import { touchRecentView } from "../features/activity/property-recent-views.api";
+import { getProperty, saveProperty } from "../features/property/property.api";
 import {
   deleteQueuedProperty,
-  getQueuePropertyFromStorage,
   retryPropertyCrawl,
 } from "../features/property/property-crawl.api";
 import {
@@ -42,6 +41,8 @@ import {
   isCrawlCompleted,
 } from "../features/property/property-crawl-status";
 import { recordToCrawlPayload } from "../features/property/property-crawl.mapper";
+import { ComplexPropertyInfo } from "../features/property/ComplexPropertyInfo";
+import { getPropertyCrawlKind } from "../types/property-crawl-kind";
 import { propertyFormSchema } from "../features/property/property.schema";
 import {
   PROPERTY_RATING_ITEMS,
@@ -226,14 +227,8 @@ export function PropertyDetailPage() {
   });
 
   const property = useMemo(() => {
-    if (propertyQuery.data) {
-      return propertyQuery.data;
-    }
-    if (!propertyId) {
-      return null;
-    }
-    return getQueuePropertyFromStorage(propertyId) ?? getMockProperty(propertyId, actor);
-  }, [actor, propertyId, propertyQuery.data]);
+    return propertyQuery.data ?? null;
+  }, [propertyQuery.data]);
 
   const crawlStatus = property ? getPropertyCrawlStatus(property) : "completed";
   const crawlReady = property ? isCrawlCompleted(property) : false;
@@ -249,7 +244,21 @@ export function PropertyDetailPage() {
     reset(recordToFormValues(property));
   }, [property, reset]);
 
+  useEffect(() => {
+    if (!actor || !property?.id) {
+      return;
+    }
+    void touchRecentView(actor, property.id).catch(() => {
+      // 최근 본 항목 기록 실패는 상세 진입을 막지 않는다.
+    });
+  }, [actor, property?.id]);
+
   const crawlPayload = property ? recordToCrawlPayload(property) : null;
+  const hasMapLocation =
+    crawlPayload?.latitude != null && crawlPayload.longitude != null && Boolean(crawlPayload.source_url?.trim());
+  const isComplex = crawlPayload ? getPropertyCrawlKind(crawlPayload) === "complex" : false;
+  const complexPriceLabel =
+    crawlPayload?.metadata?.complexSnapshot?.priceSource === "listing_min" ? "최저 매물가" : "최근 실거래";
 
   const ratingLocation = watch("rating_location");
   const ratingPrice = watch("rating_price");
@@ -303,11 +312,7 @@ export function PropertyDetailPage() {
       if (!propertyId) {
         return;
       }
-      if (getQueuePropertyFromStorage(propertyId)) {
-        await deleteQueuedProperty(propertyId);
-        return;
-      }
-      await deleteProperty(propertyId);
+      await deleteQueuedProperty(propertyId);
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["properties"] });
@@ -404,6 +409,10 @@ export function PropertyDetailPage() {
                   alt={property.title ?? "매물"}
                   className="aspect-[16/10] w-full object-cover"
                 />
+              ) : crawlReady && hasMapLocation && crawlPayload ? (
+                <Suspense fallback={<div className="aspect-[16/10] animate-pulse bg-slate-100" />}>
+                  <PropertyLocationMap crawl={crawlPayload} />
+                </Suspense>
               ) : (
                 <div className="flex aspect-[16/10] flex-col items-center justify-center gap-1 px-6 text-center">
                   <p className="text-[13px] font-medium text-slate-500">
@@ -417,10 +426,22 @@ export function PropertyDetailPage() {
             </div>
 
             <div className="p-4">
-              <h2 className="text-[18px] font-bold leading-snug text-slate-950">
-                {getPropertyDisplayTitle(property)}
-              </h2>
-              <p className="mt-1 break-all text-[12px] leading-relaxed text-slate-400">{property.source_url}</p>
+              <div className="flex items-start justify-between gap-3">
+                <h2 className="min-w-0 flex-1 text-[18px] font-bold leading-snug text-slate-950">
+                  {getPropertyDisplayTitle(property)}
+                </h2>
+                {property.source_url ? (
+                  <a
+                    href={property.source_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex shrink-0 cursor-pointer items-center gap-0.5 pt-0.5 text-[12px] font-medium text-slate-400 transition hover:text-slate-600 active:opacity-70"
+                  >
+                    <ExternalLink className="h-3 w-3" strokeWidth={2.25} />
+                    <span>원본</span>
+                  </a>
+                ) : null}
+              </div>
               {property.address ? (
                 <p className="mt-2 text-[13px] leading-relaxed text-slate-500">{property.address}</p>
               ) : null}
@@ -439,7 +460,7 @@ export function PropertyDetailPage() {
                   </div>
 
                   <div className="mt-4 border-t border-slate-100 pt-4">
-                    <p className="text-[11px] font-medium text-slate-500">등록가</p>
+                    <p className="text-[11px] font-medium text-slate-500">{isComplex ? complexPriceLabel : "등록가"}</p>
                     <PriceDisplay value={property.current_price_value} size="lg" className="mt-0.5 text-emerald-600" />
                   </div>
                 </>
@@ -447,7 +468,13 @@ export function PropertyDetailPage() {
             </div>
           </article>
 
-          {crawlReady ? (
+          {crawlReady && isComplex && crawlPayload ? (
+            <Section label="단지 정보">
+              <ComplexPropertyInfo crawl={crawlPayload} />
+            </Section>
+          ) : null}
+
+          {crawlReady && !isComplex ? (
             <Section label="기본 정보">
               <article className="toss-card divide-y divide-slate-100 overflow-hidden border-slate-200 p-0">
                 <DetailRow label="면적" value={formatArea(property)} />
@@ -488,7 +515,6 @@ export function PropertyDetailPage() {
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <p className="text-[14px] font-semibold text-slate-900">출퇴근 · 학교 · 편의시설</p>
-                  <p className="mt-0.5 text-[12px] text-slate-500">별점을 선택하고 저장하세요</p>
                 </div>
                 {ratingAverage != null ? (
                   <span className="shrink-0 rounded-full bg-amber-50 px-2.5 py-1 text-[12px] font-bold text-amber-700">
@@ -587,24 +613,12 @@ export function PropertyDetailPage() {
             </article>
           </Section>
 
-          {crawlReady && crawlPayload?.latitude != null && crawlPayload.longitude != null ? (
+          {crawlReady && hasMapLocation && property.thumbnail_url && crawlPayload ? (
             <Section label="위치">
               <Suspense fallback={<div className="h-44 animate-pulse rounded-2xl bg-slate-100" />}>
                 <PropertyLocationMap crawl={crawlPayload} />
               </Suspense>
             </Section>
-          ) : null}
-
-          {property.source_url ? (
-            <a
-              href={property.source_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="toss-button-surface flex w-full cursor-pointer items-center justify-center gap-1.5 border-slate-200 py-3.5 font-semibold text-slate-700 transition active:bg-slate-100"
-            >
-              <ExternalLink className="h-4 w-4" />
-              <span>원본 매물 보기</span>
-            </a>
           ) : null}
 
           <Button
