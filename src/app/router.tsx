@@ -15,6 +15,7 @@ import { FavoritesPage } from "../pages/activity/FavoritesPage";
 import { HistoryPage } from "../pages/activity/HistoryPage";
 import { RatedItemsPage } from "../pages/activity/RatedItemsPage";
 import { RecentViewsPage } from "../pages/activity/RecentViewsPage";
+import { LoginPage } from "../pages/LoginPage";
 
 function PropertyEditRedirect() {
   const { propertyId } = useParams();
