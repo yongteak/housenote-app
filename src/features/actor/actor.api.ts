@@ -15,6 +15,25 @@ const FALLBACK_ACTORS: FixedActor[] = [
 ];
 
 /**
+ * 데모 저장자 목록에서 전화번호 뒷자리로 세션 정보를 만든다.
+ * @param phoneSuffix 허용 ID (1111 또는 2222)
+ */
+function findFallbackActor(phoneSuffix: string): SelectedActor | null {
+  const actor = FALLBACK_ACTORS.find(
+    (item) => item.phone_suffix === phoneSuffix && item.is_active,
+  );
+  if (!actor) {
+    return null;
+  }
+
+  return {
+    actorId: actor.id,
+    phoneSuffix: actor.phone_suffix,
+    actorName: actor.display_name,
+  };
+}
+
+/**
  * 활성 저장자 목록을 조회한다.
  */
 export async function fetchFixedActors(): Promise<FixedActor[]> {
@@ -42,7 +61,11 @@ export async function fetchFixedActors(): Promise<FixedActor[]> {
  */
 export async function authenticateByPhoneSuffix(phoneSuffix: string): Promise<SelectedActor> {
   if (!isSupabaseConfigured()) {
-    throw new Error("Supabase 환경변수(VITE_SUPABASE_*)를 먼저 설정해주세요.");
+    const fallbackActor = findFallbackActor(phoneSuffix);
+    if (!fallbackActor) {
+      throw new Error("저장자 정보를 찾을 수 없습니다.");
+    }
+    return fallbackActor;
   }
 
   const { data, error } = await supabase

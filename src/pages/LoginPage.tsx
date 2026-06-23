@@ -1,30 +1,47 @@
 /**
  * @file LoginPage.tsx
- * @description 1111/2222 ID로 저장자 로그인을 처리하는 화면. Apple HIG 레이아웃 적용.
+ * @description 아빠/엄마 프로필 선택 후 로그인하는 화면.
  */
-import { type FormEvent, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { LoginProfileAvatar } from "../components/login/LoginProfileAvatar";
 import { Button } from "../components/ui/Button";
-import { NavBar } from "../components/ui/NavBar";
 import { authenticateByPhoneSuffix } from "../features/actor/actor.api";
 import { useAuth } from "../lib/auth-context";
+import { cn } from "../lib/cn";
 
-/** 허용되는 로그인 ID */
-const ALLOWED_LOGIN_IDS = ["1111", "2222"] as const;
+/** 로그인 프로필 옵션 */
+const LOGIN_PROFILES = [
+  { phoneSuffix: "1111", label: "아빠", variant: "dad" as const },
+  { phoneSuffix: "2222", label: "엄마", variant: "mom" as const },
+];
 
 /**
- * 입력값이 허용 ID인지 검사한다.
- * @param value 사용자 입력
+ * 로그인 실패 메시지를 사용자 친화 문구로 정리한다.
+ * @param error catch된 오류
  */
-function isAllowedLoginId(value: string): value is (typeof ALLOWED_LOGIN_IDS)[number] {
-  return (ALLOWED_LOGIN_IDS as readonly string[]).includes(value);
+function getLoginErrorMessage(error: unknown): string {
+  if (!(error instanceof Error)) {
+    return "로그인에 실패했습니다. 잠시 후 다시 시도해주세요.";
+  }
+
+  const message = error.message.trim();
+  if (!message) {
+    return "로그인에 실패했습니다. 잠시 후 다시 시도해주세요.";
+  }
+
+  if (message.includes("Failed to fetch") || message.includes("NetworkError")) {
+    return "네트워크 연결을 확인한 뒤 다시 시도해주세요.";
+  }
+
+  return message;
 }
 
 export function LoginPage() {
   const navigate = useNavigate();
   const { actor, login } = useAuth();
-  const [loginId, setLoginId] = useState("");
+  const [selectedPhoneSuffix, setSelectedPhoneSuffix] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -35,15 +52,10 @@ export function LoginPage() {
   }, [actor, navigate]);
 
   /**
-   * 로그인 폼 제출을 처리한다.
-   * @param event 폼 submit 이벤트
+   * 선택한 프로필로 로그인을 수행한다.
    */
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    const trimmedId = loginId.trim();
-    if (!isAllowedLoginId(trimmedId)) {
-      setErrorMessage("1111 또는 2222만 입력할 수 있습니다.");
+  async function handleLogin() {
+    if (!selectedPhoneSuffix || isSubmitting) {
       return;
     }
 
@@ -51,47 +63,69 @@ export function LoginPage() {
     setErrorMessage(null);
 
     try {
-      const authenticatedActor = await authenticateByPhoneSuffix(trimmedId);
+      const authenticatedActor = await authenticateByPhoneSuffix(selectedPhoneSuffix);
       login(authenticatedActor);
       navigate("/", { replace: true });
     } catch (error) {
-      setErrorMessage((error as Error).message);
+      setErrorMessage(getLoginErrorMessage(error));
     } finally {
       setIsSubmitting(false);
     }
   }
 
   return (
-    <div className="flex flex-col min-h-dvh bg-slate-50/30">
-      <NavBar title="저장자 로그인" />
+    <div className="flex min-h-dvh flex-col bg-slate-50/30">
+      <main className="flex flex-1 items-center justify-center px-6">
+        <div className="grid w-full max-w-sm grid-cols-2 gap-5">
+          {LOGIN_PROFILES.map((profile) => {
+            const isSelected = selectedPhoneSuffix === profile.phoneSuffix;
 
-      <main className="flex-1 px-4 py-6 space-y-4">
-        <article className="toss-card border-slate-200">
-          <p className="text-[16px] font-bold text-slate-900">전화번호 뒷자리 4자리를 입력하세요.</p>
-          <p className="mt-1 text-[13px] text-slate-500">허용 ID: 1111, 2222</p>
-        </article>
-
-        <form className="toss-card space-y-4 border-slate-200" onSubmit={handleSubmit}>
-          <div className="space-y-1.5">
-            <span className="text-[12px] font-semibold text-slate-500">로그인 ID</span>
-            <input
-              className="toss-input"
-              inputMode="numeric"
-              maxLength={4}
-              placeholder="4자리 입력"
-              value={loginId}
-              onChange={(event) => setLoginId(event.target.value)}
-              autoComplete="off"
-            />
-          </div>
-
-          {errorMessage ? <p className="text-[13px] text-rose-500 font-semibold">{errorMessage}</p> : null}
-
-          <Button type="submit" variant="primary" className="w-full" disabled={isSubmitting}>
-            {isSubmitting ? "인증 중..." : "인증 및 로그인"}
-          </Button>
-        </form>
+            return (
+              <button
+                key={profile.phoneSuffix}
+                type="button"
+                aria-pressed={isSelected}
+                className={cn(
+                  "flex flex-col items-center gap-3 rounded-3xl border bg-white p-5 transition",
+                  isSelected
+                    ? "border-emerald-400 bg-emerald-50/60 shadow-[0_8px_24px_rgb(16_185_129/0.18)]"
+                    : "border-slate-200 hover:border-slate-300 active:scale-[0.98]",
+                )}
+                onClick={() => {
+                  setSelectedPhoneSuffix(profile.phoneSuffix);
+                  setErrorMessage(null);
+                }}
+              >
+                <div
+                  className={cn(
+                    "h-24 w-24 overflow-hidden rounded-full ring-4 transition",
+                    isSelected ? "ring-emerald-300" : "ring-transparent",
+                  )}
+                >
+                  <LoginProfileAvatar variant={profile.variant} />
+                </div>
+                <span className="text-[18px] font-bold text-slate-900">{profile.label}</span>
+              </button>
+            );
+          })}
+        </div>
       </main>
+
+      <footer className="border-t border-slate-200/80 bg-white/95 px-4 pt-4 pb-[calc(env(safe-area-inset-bottom,0px)+16px)] backdrop-blur-md">
+        {errorMessage ? (
+          <p className="mb-3 text-center text-[13px] font-semibold text-rose-500">{errorMessage}</p>
+        ) : null}
+
+        <Button
+          type="button"
+          variant="primary"
+          className="w-full"
+          disabled={!selectedPhoneSuffix || isSubmitting}
+          onClick={handleLogin}
+        >
+          {isSubmitting ? "로그인 중..." : "로그인"}
+        </Button>
+      </footer>
     </div>
   );
 }
