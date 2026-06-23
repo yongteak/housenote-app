@@ -2,8 +2,11 @@
  * @file property.api.ts
  * @description balpoom.properties CRUD와 목록 필터 조회를 담당한다.
  */
+import { getMockProperty } from "../../fixtures/mobile-mvp-ui-mock";
 import { isSupabaseConfigured, supabase } from "../../lib/supabase";
 import { buildPropertySavePayload } from "./property-crawl.mapper";
+import { getQueuePropertyFromStorage } from "./property-crawl.api";
+import { removeStoredQueueProperty } from "./property-crawl-queue.storage";
 import type { PropertyCrawlPayload } from "../../types/property-crawl";
 import type {
   PropertyFilters,
@@ -11,9 +14,15 @@ import type {
   PropertyRecord,
   SelectedActor,
 } from "../../types/property";
-
-/** Supabase schema 이름 */
 const BALPOOM_SCHEMA = "balpoom";
+
+/**
+ * 로컬 mock·크롤 큐에서 매물을 동기 조회한다.
+ * 즐겨찾기 목록 등 propertyId lookup 에 사용.
+ */
+export function resolveLocalProperty(propertyId: string, actor: SelectedActor | null): PropertyRecord | null {
+  return getQueuePropertyFromStorage(propertyId) ?? getMockProperty(propertyId, actor);
+}
 
 /**
  * 매물 목록을 필터 조건으로 조회한다.
@@ -58,7 +67,7 @@ export async function listProperties(filters: PropertyFilters): Promise<Property
  */
 export async function getProperty(propertyId: string): Promise<PropertyRecord | null> {
   if (!isSupabaseConfigured()) {
-    return null;
+    return getQueuePropertyFromStorage(propertyId);
   }
 
   const { data, error } = await supabase
@@ -135,6 +144,7 @@ export async function saveProperty(
  */
 export async function deleteProperty(propertyId: string): Promise<void> {
   if (!isSupabaseConfigured()) {
+    removeStoredQueueProperty(propertyId);
     return;
   }
 

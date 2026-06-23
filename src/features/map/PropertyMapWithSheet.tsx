@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import L from "leaflet";
 import { MapContainer, Marker, TileLayer, useMap } from "react-leaflet";
@@ -6,6 +6,10 @@ import ExternalLink from "lucide-react/dist/esm/icons/external-link";
 import FileText from "lucide-react/dist/esm/icons/file-text";
 
 import { PropertyRatingSummary } from "../../components/PropertyRatingSummary";
+import { ActorAvatar } from "../../components/actor/ActorAvatar";
+import { PriceDisplay } from "../../components/PriceDisplay";
+import { CrawlStatusBadge } from "../../components/property/CrawlStatusBadge";
+import { FavoriteButton } from "../../components/property/FavoriteButton";
 import { BottomSheet } from "../../components/ui/BottomSheet";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { MapFilterStatsBar } from "./MapFilterStatsBar";
@@ -19,7 +23,7 @@ import {
 import {
   getPropertyAverageRating,
 } from "../property/property-ratings";
-import { formatDate, formatPriceEok, formatPyeong, formatWon } from "../../lib/format";
+import { formatDate, formatPriceManwon, formatPyeong } from "../../lib/format";
 import { cn } from "../../lib/cn";
 import type { DecisionStatus, PropertyRecord } from "../../types/property";
 
@@ -125,7 +129,7 @@ function MapPropertyGroupSwitcher({ properties, selectedId, onSelect }: MapPrope
                 selected ? "border-sky-500 bg-sky-50 text-sky-700" : "border-slate-200 bg-white text-slate-700",
               )}
             >
-              {formatPyeong(property.area_supply_m2)} · {formatPriceEok(property.current_price_value)}
+              {formatPyeong(property.area_supply_m2)} · {formatPriceManwon(property.current_price_value)}
             </button>
           );
         })}
@@ -140,16 +144,18 @@ function formatArea(property: PropertyRecord): string {
 }
 
 type PropertyMapSheetHeaderActionsProps = {
+  propertyId: string;
   sourceUrl: string;
   onOpenDetail: () => void;
 };
 
-function PropertyMapSheetHeaderActions({ sourceUrl, onOpenDetail }: PropertyMapSheetHeaderActionsProps) {
+function PropertyMapSheetHeaderActions({ propertyId, sourceUrl, onOpenDetail }: PropertyMapSheetHeaderActionsProps) {
   return (
-    <div className="flex items-center gap-2.5">
+    <div className="flex items-center gap-1">
+      <FavoriteButton propertyId={propertyId} size="sm" />
       <button
         type="button"
-        className="inline-flex items-center gap-1 text-[13px] font-medium text-emerald-600 transition hover:text-emerald-700 active:opacity-70"
+        className="inline-flex cursor-pointer items-center gap-1 text-[13px] font-medium text-emerald-600 transition hover:text-emerald-700 active:opacity-70"
         onClick={onOpenDetail}
       >
         <FileText className="h-3.5 w-3.5" strokeWidth={2.25} />
@@ -159,7 +165,7 @@ function PropertyMapSheetHeaderActions({ sourceUrl, onOpenDetail }: PropertyMapS
         href={sourceUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center gap-1 text-[13px] font-medium text-slate-500 transition hover:text-slate-700 active:opacity-70"
+        className="inline-flex cursor-pointer items-center gap-1 text-[13px] font-medium text-slate-500 transition hover:text-slate-700 active:opacity-70"
       >
         <ExternalLink className="h-3.5 w-3.5" strokeWidth={2.25} />
         <span>원본</span>
@@ -170,7 +176,7 @@ function PropertyMapSheetHeaderActions({ sourceUrl, onOpenDetail }: PropertyMapS
 
 type DetailRowProps = {
   label: string;
-  value: string;
+  value: ReactNode;
 };
 
 function DetailRow({ label, value }: DetailRowProps) {
@@ -184,14 +190,11 @@ function DetailRow({ label, value }: DetailRowProps) {
 
 type PropertyMapDetailProps = {
   property: PropertyRecord;
+  onOpenDetail: () => void;
 };
 
-function PropertyMapDetail({ property }: PropertyMapDetailProps) {
+function PropertyMapDetail({ property, onOpenDetail }: PropertyMapDetailProps) {
   const ratingAvg = getPropertyAverageRating(property);
-  const priceGap =
-    property.current_price_value != null && property.desired_price_value != null
-      ? property.current_price_value - property.desired_price_value
-      : null;
 
   return (
     <div className="space-y-4 px-4 pb-6 pt-1">
@@ -202,28 +205,35 @@ function PropertyMapDetail({ property }: PropertyMapDetailProps) {
           ) : null}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-[16px] font-bold leading-tight text-slate-950">{property.title ?? "제목 없음"}</p>
-          <p className="mt-1 text-[12px] leading-relaxed text-slate-500">{property.address ?? "-"}</p>
-          <div className="mt-2 flex flex-wrap gap-1.5">
-            <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
+          <div className="flex items-start justify-between gap-3">
+            <p className="text-[16px] font-bold leading-snug text-slate-950 flex-1">{property.title ?? "제목 없음"}</p>
+            <div className="shrink-0 pt-0.5">
+              <PropertyMapSheetHeaderActions
+                propertyId={property.id}
+                sourceUrl={property.source_url}
+                onOpenDetail={onOpenDetail}
+              />
+            </div>
+          </div>
+          <p className="mt-1.5 text-[12px] leading-relaxed text-slate-500">{property.address ?? "-"}</p>
+          <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+            <CrawlStatusBadge property={property} />
+            <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-normal text-slate-600">
               {property.property_type ?? "매물"}
             </span>
-            <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
+            <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-normal text-slate-600">
               {property.deal_type ?? "-"}
             </span>
+            <PropertyRatingSummary property={property} compact />
           </div>
         </div>
       </div>
 
-      <div className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2.5">
-        <p className="text-[12px] text-slate-500">등록가</p>
-        <p className="text-[22px] font-bold text-slate-950">{formatWon(property.current_price_value)}</p>
-        {property.desired_price_value != null ? (
-          <p className="mt-1 text-[12px] font-medium text-emerald-700">
-            희망가 {formatWon(property.desired_price_value)}
-            {priceGap != null && priceGap > 0 ? ` · ${formatWon(priceGap)} 여유` : null}
-          </p>
-        ) : null}
+      <div className="rounded-xl border border-slate-100 bg-slate-50 px-3.5 py-2.5">
+        <div className="flex items-center justify-between">
+          <span className="text-[12px] font-medium text-slate-500">등록가</span>
+          <PriceDisplay value={property.current_price_value} size="md" className="font-bold text-slate-950" />
+        </div>
       </div>
 
       <div className="divide-y divide-slate-100 rounded-xl border border-slate-100 px-3">
@@ -235,12 +245,15 @@ function PropertyMapDetail({ property }: PropertyMapDetailProps) {
         <DetailRow label="방문" value={property.visited ? `방문 · ${formatDate(property.visited_at)}` : "미방문"} />
         <DetailRow label="판단" value={statusLabelMap[property.decision_status]} />
         <DetailRow label="평가" value={ratingAvg != null ? `평균 ${ratingAvg.toFixed(1)}점` : "미평가"} />
-        <DetailRow label="기록자" value={property.actor_name} />
-      </div>
-
-      <div className="rounded-xl border border-slate-100 bg-white px-3 py-2.5">
-        <p className="mb-2 text-[12px] font-semibold text-slate-500">항목별 평가</p>
-        <PropertyRatingSummary property={property} />
+        <DetailRow
+          label="기록자"
+          value={
+            <span className="inline-flex items-center justify-end gap-1.5">
+              <ActorAvatar phoneSuffix={property.phone_suffix} size="xs" label={property.actor_name} />
+              <span>{property.actor_name}</span>
+            </span>
+          }
+        />
       </div>
 
       {property.memo ? (
@@ -338,10 +351,20 @@ export function PropertyMapWithSheet({
 
   if (!mapCenter) {
     return (
-      <EmptyState
-        title="지도로 볼 수 있는 매물이 없어요."
-        description="좌표가 포함된 매물부터 지도 탐색이 가능해요."
-      />
+      <div
+        className={cn(
+          "flex h-full min-h-0 w-full flex-col bg-slate-100",
+          fullScreen && "pt-[calc(max(env(safe-area-inset-top),12px)+3.25rem)]",
+        )}
+      >
+        <div className={cn("flex flex-1 items-center justify-center", fullScreen ? "px-4 pb-8" : "p-4")}>
+          <EmptyState
+            className="w-full"
+            title="지도로 볼 수 있는 매물이 없어요."
+            description="좌표가 포함된 매물부터 지도 탐색이 가능해요."
+          />
+        </div>
+      </div>
     );
   }
 
@@ -360,7 +383,9 @@ export function PropertyMapWithSheet({
           center={mapCenter}
           zoom={13}
           className={`w-full ${mapHeightClass}`}
-          scrollWheelZoom={false}
+          scrollWheelZoom={fullScreen}
+          touchZoom
+          dragging
           zoomControl={false}
           attributionControl={false}
         >
@@ -399,16 +424,7 @@ export function PropertyMapWithSheet({
       <BottomSheet
         open={Boolean(selectedProperty)}
         onClose={() => setSelectedId(null)}
-        layout="inset"
         title={selectedProperty?.title ?? "매물 정보"}
-        headerLeading={
-          selectedProperty ? (
-            <PropertyMapSheetHeaderActions
-              sourceUrl={selectedProperty.source_url}
-              onOpenDetail={() => navigate(`/properties/${selectedProperty.id}`)}
-            />
-          ) : null
-        }
       >
         {selectedProperty ? (
           <>
@@ -417,7 +433,10 @@ export function PropertyMapWithSheet({
               selectedId={selectedProperty.id}
               onSelect={handleSelectProperty}
             />
-            <PropertyMapDetail property={selectedProperty} />
+            <PropertyMapDetail
+              property={selectedProperty}
+              onOpenDetail={() => navigate(`/properties/${selectedProperty.id}`)}
+            />
           </>
         ) : null}
       </BottomSheet>

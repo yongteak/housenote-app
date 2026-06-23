@@ -1,18 +1,25 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { motion } from "motion/react";
 import Clock3 from "lucide-react/dist/esm/icons/clock-3";
+import Map from "lucide-react/dist/esm/icons/map";
 import Plus from "lucide-react/dist/esm/icons/plus";
 import X from "lucide-react/dist/esm/icons/x";
-import CircleUserRound from "lucide-react/dist/esm/icons/circle-user-round";
 import { Link, useNavigate } from "react-router-dom";
 
-import { PropertyRatingSummary } from "../components/PropertyRatingSummary";
+import { ActorAvatar } from "../components/actor/ActorAvatar";
+import { CrawlQueueHomeBanner } from "../components/property/CrawlQueueHomeBanner";
+import { CrawlStatusBadge } from "../components/property/CrawlStatusBadge";
+import { FavoriteButton } from "../components/property/FavoriteButton";
+import { EmptyState } from "../components/ui/EmptyState";
+import { PriceDisplay } from "../components/PriceDisplay";
 import { StarRatingInput } from "../components/StarRatingInput";
+import { PropertyRatingSummary } from "../components/PropertyRatingSummary";
 import { BottomSheet } from "../components/ui/BottomSheet";
 import { Button } from "../components/ui/Button";
-import { EmptyState } from "../components/ui/EmptyState";
 import { SelectorField, SelectorList, type SelectorOption } from "../components/ui/Selector";
 import { getMockProperties } from "../fixtures/mobile-mvp-ui-mock";
+import { listCompletedQueuePropertiesForHome } from "../features/property/property-crawl.api";
 import { listProperties } from "../features/property/property.api";
 import {
   DEFAULT_RATING_FILTER,
@@ -24,11 +31,10 @@ import {
 } from "../features/property/property-ratings";
 import { cn } from "../lib/cn";
 import { useAuth } from "../lib/auth-context";
-import { formatWon } from "../lib/format";
 import {
+  DEFAULT_PROPERTY_LIST_FILTERS,
   loadPropertyListFilters,
   savePropertyListFilters,
-  type ListViewMode,
   type PropertyListFilterState,
   type StatusFilterValue,
   type VisitedFilterValue,
@@ -49,13 +55,13 @@ const statusLabelMap: Record<DecisionStatus, string> = {
 };
 
 const visitedOptions: SelectorOption<VisitedFilterValue>[] = [
-  { value: "all", label: "방문 전체" },
+  { value: "all", label: "전체" },
   { value: "yes", label: "방문함" },
   { value: "no", label: "미방문" },
 ];
 
 const statusOptions: SelectorOption<StatusFilterValue>[] = [
-  { value: "all", label: "상태 전체" },
+  { value: "all", label: "전체" },
   { value: "review", label: "다시보기" },
   { value: "hold", label: "보류" },
   { value: "exclude", label: "제외" },
@@ -63,7 +69,7 @@ const statusOptions: SelectorOption<StatusFilterValue>[] = [
 ];
 
 const ratingStatusOptions: SelectorOption<RatingFilterStatus>[] = [
-  { value: "all", label: "평가 전체" },
+  { value: "all", label: "전체" },
   { value: "rated", label: "평가함" },
   { value: "unrated", label: "미평가" },
 ];
@@ -74,6 +80,14 @@ function statusLabel(status: DecisionStatus): string {
 
 function findLabel<T extends string>(options: SelectorOption<T>[], value: T) {
   return options.find((option) => option.value === value)?.label ?? "-";
+}
+
+function getRatingFilterDisplayLabel(criteria: RatingFilterCriteria, compact = false): string {
+  const label = getRatingFilterLabel(criteria);
+  if (compact && label === "평가 · 조건") {
+    return "조건";
+  }
+  return label;
 }
 
 function applyFilters(
@@ -100,27 +114,53 @@ function sortForListView(properties: PropertyRecord[]) {
   });
 }
 
-type ViewModeToggleProps = {
-  mode: ListViewMode;
-  onChange: (mode: ListViewMode) => void;
-};
+function MapViewFloatingButton({ onClick }: { onClick: () => void }) {
+  const [expanded, setExpanded] = useState(false);
 
-function ViewModeToggle({ mode, onChange }: ViewModeToggleProps) {
+  useEffect(() => {
+    const timer = window.setTimeout(() => setExpanded(true), 600);
+    return () => window.clearTimeout(timer);
+  }, []);
+
   return (
-    <div className="inline-flex w-full rounded-lg bg-slate-100 p-0.5">
-      {(["list", "map"] as const).map((value) => (
-        <button
-          key={value}
-          type="button"
-          className={cn(
-            "flex-1 rounded-md py-1.5 text-[13px] font-semibold transition",
-            mode === value ? "bg-white text-slate-900 shadow-sm" : "text-slate-500",
-          )}
-          onClick={() => onChange(value)}
+    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-30 mx-auto flex max-w-xl justify-center pb-[calc(16px+env(safe-area-inset-bottom))]">
+      <motion.button
+        type="button"
+        className="property-map-floating-btn pointer-events-auto overflow-hidden flex items-center justify-start"
+        aria-label="지도 보기"
+        onClick={onClick}
+        initial={{ width: 44 }}
+        animate={{
+          width: expanded ? 116 : 44,
+        }}
+        style={{
+          paddingLeft: 14, // 아이콘의 왼쪽 여백을 14px로 절대 고정하여 뚝 끊기는 현상 방지
+        }}
+        transition={{
+          type: "spring",
+          stiffness: 300,
+          damping: 26,
+          mass: 1
+        }}
+      >
+        <Map className="h-4 w-4 shrink-0" />
+        <motion.span
+          className="overflow-hidden whitespace-nowrap text-[13px] font-bold text-white"
+          initial={{ opacity: 0, width: 0, marginLeft: 0 }}
+          animate={{
+            opacity: expanded ? 1 : 0,
+            width: expanded ? 54 : 0,
+            marginLeft: expanded ? 6 : 0,
+          }}
+          transition={{
+            duration: 0.18,
+            delay: expanded ? 0.08 : 0,
+            ease: "easeOut"
+          }}
         >
-          {value === "list" ? "리스트" : "지도"}
-        </button>
-      ))}
+          지도 보기
+        </motion.span>
+      </motion.button>
     </div>
   );
 }
@@ -131,6 +171,9 @@ type FilterControlsProps = {
   ratingFilter: RatingFilterCriteria;
   onOpenSheet: (sheet: Exclude<FilterSheet, null>) => void;
   compact?: boolean;
+  layout?: "grid" | "scrollable";
+  flat?: boolean;
+  centered?: boolean;
 };
 
 function FilterControls({
@@ -139,26 +182,44 @@ function FilterControls({
   ratingFilter,
   onOpenSheet,
   compact = false,
+  layout = "grid",
+  flat = false,
+  centered = false,
 }: FilterControlsProps) {
+  const scrollable = layout === "scrollable";
+  const filterBtnClass = flat ? "property-list-filter-btn" : "property-map-filter-btn";
+
   return (
-    <div className={cn("grid grid-cols-3 gap-2", compact ? "" : "w-full")}>
+    <div
+      className={cn(
+        scrollable
+          ? cn("flex w-max gap-2", centered ? "mx-auto" : "pr-8")
+          : cn("grid min-w-0 grid-cols-3", compact ? "gap-1" : "w-full gap-2"),
+      )}
+    >
       <SelectorField
+        compact={compact && !scrollable}
+        scrollable={scrollable}
+        className={cn(scrollable ? filterBtnClass : null)}
         label="방문"
         valueLabel={findLabel(visitedOptions, visitedFilter)}
         onClick={() => onOpenSheet("visited")}
-        className={compact ? "py-2" : undefined}
       />
       <SelectorField
+        compact={compact && !scrollable}
+        scrollable={scrollable}
+        className={cn(scrollable ? filterBtnClass : null)}
         label="상태"
         valueLabel={findLabel(statusOptions, statusFilter)}
         onClick={() => onOpenSheet("status")}
-        className={compact ? "py-2" : undefined}
       />
       <SelectorField
+        compact={compact && !scrollable}
+        scrollable={scrollable}
+        className={cn(scrollable ? filterBtnClass : null)}
         label="평가"
-        valueLabel={getRatingFilterLabel(ratingFilter)}
+        valueLabel={getRatingFilterDisplayLabel(ratingFilter, compact && !scrollable)}
         onClick={() => onOpenSheet("rating")}
-        className={compact ? "py-2" : undefined}
       />
     </div>
   );
@@ -180,9 +241,9 @@ function RatingFilterSheet({ open, value, onChange, onClose }: RatingFilterSheet
 
   return (
     <BottomSheet open={open} onClose={onClose} title="평가 필터">
-      <div className="space-y-5 px-4 pb-6">
+      <div className="space-y-5 px-4 pb-6 pt-2">
         <SelectorList
-          title="평가 여부"
+          className="px-0 pt-0 pb-0"
           selectedValue={value.status}
           options={ratingStatusOptions}
           onSelect={(status) => onChange({ ...value, status })}
@@ -252,7 +313,6 @@ function FilterSheets({ openSheet, filters, onClose, onFiltersChange }: FilterSh
     <>
       <BottomSheet open={openSheet === "visited"} onClose={onClose} title="방문 필터">
         <SelectorList
-          title="방문 상태"
           selectedValue={filters.visited}
           options={visitedOptions}
           onSelect={(visited) => {
@@ -263,7 +323,6 @@ function FilterSheets({ openSheet, filters, onClose, onFiltersChange }: FilterSh
       </BottomSheet>
       <BottomSheet open={openSheet === "status"} onClose={onClose} title="상태 필터">
         <SelectorList
-          title="판단 상태"
           selectedValue={filters.status}
           options={statusOptions}
           onSelect={(status) => {
@@ -303,14 +362,24 @@ export function PropertyListPage() {
     enabled: Boolean(actor),
   });
 
-  const sourceProperties = useMemo<PropertyRecord[]>(
-    () => (query.data && query.data.length > 0 ? query.data : getMockProperties(actor)),
-    [actor, query.data],
-  );
+  const sourceProperties = useMemo<PropertyRecord[]>(() => {
+    if (query.data && query.data.length > 0) {
+      return query.data;
+    }
+
+    const mock = getMockProperties(actor);
+    const queued = listCompletedQueuePropertiesForHome(actor);
+    const mockIds = new Set(mock.map((item) => item.id));
+    const merged = [...queued.filter((item) => !mockIds.has(item.id)), ...mock];
+    return merged;
+  }, [actor, query.data]);
+
+  const listFilters =
+    query.data && query.data.length > 0 ? filters : DEFAULT_PROPERTY_LIST_FILTERS;
 
   const filteredProperties = useMemo(
-    () => applyFilters(sourceProperties, filters.visited, filters.status, filters.rating),
-    [filters.rating, filters.status, filters.visited, sourceProperties],
+    () => applyFilters(sourceProperties, listFilters.visited, listFilters.status, listFilters.rating),
+    [listFilters.rating, listFilters.status, listFilters.visited, sourceProperties],
   );
 
   const listPropertiesSorted = useMemo(() => sortForListView(filteredProperties), [filteredProperties]);
@@ -334,22 +403,22 @@ export function PropertyListPage() {
         </div>
 
         <div className="pointer-events-none absolute inset-x-0 top-0 z-50 px-3 pt-[max(env(safe-area-inset-top),12px)]">
-          <div className="property-map-top-bar pointer-events-auto flex items-center gap-2">
-            <Button
-              variant="surface"
-              size="sm"
-              className="shrink-0 border-transparent bg-white/78 px-3 shadow-none"
-              leadingIcon={<X className="h-4 w-4" />}
+          <div className="pointer-events-auto flex items-stretch gap-2">
+            <button
+              type="button"
+              className="property-map-close-btn"
+              aria-label="닫기"
               onClick={() => setFilters((current) => ({ ...current, viewMode: "list" }))}
             >
-              닫기
-            </Button>
-            <div className="min-w-0 flex-1">
+              <X className="h-4 w-4 shrink-0" />
+              <span>닫기</span>
+            </button>
+            <div className="property-map-top-bar property-map-filter-scroll min-w-0 flex-1">
               <FilterControls
-                compact
-                visitedFilter={filters.visited}
-                statusFilter={filters.status}
-                ratingFilter={filters.rating}
+                layout="scrollable"
+                visitedFilter={listFilters.visited}
+                statusFilter={listFilters.status}
+                ratingFilter={listFilters.rating}
                 onOpenSheet={setOpenSheet}
               />
             </div>
@@ -362,27 +431,26 @@ export function PropertyListPage() {
   }
 
   return (
-    <div className="flex min-h-dvh flex-col bg-slate-50/30">
-      <header className="sticky top-0 z-20 border-b border-slate-200/70 bg-white/95 backdrop-blur-md">
+    <div className="flex min-h-dvh flex-col bg-white">
+      <header className="sticky top-0 z-20 border-b border-slate-100 bg-white/95 backdrop-blur-md">
         <div className="flex h-12 items-center justify-between px-4">
-          <Button
-            variant="ghost"
-            size="icon"
+          <button
+            type="button"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full"
             aria-label="프로필"
-            leadingIcon={<CircleUserRound className="h-5 w-5" />}
             onClick={() => navigate("/profile")}
-          />
-          <h1 className="text-[15px] font-bold text-slate-950">발품</h1>
+          >
+            <ActorAvatar phoneSuffix={actor?.phoneSuffix} size="sm" label={actor?.actorName} />
+          </button>
+          <h1 className="text-[15px] font-bold text-slate-950">홈</h1>
           <div className="flex items-center gap-0.5">
             <Button
               variant="ghost"
-              size="sm"
-              className="px-2 text-[13px] font-semibold text-slate-600"
-              leadingIcon={<Clock3 className="h-4 w-4" />}
+              size="icon"
+              aria-label="활동"
+              leadingIcon={<Clock3 className="h-5 w-5" />}
               onClick={() => navigate("/activity")}
-            >
-              활동
-            </Button>
+            />
             <Button
               variant="ghost"
               size="icon"
@@ -392,79 +460,97 @@ export function PropertyListPage() {
             />
           </div>
         </div>
-        <div className="px-4 pb-3">
-          <ViewModeToggle
-            mode={filters.viewMode}
-            onChange={(viewMode) => setFilters((current) => ({ ...current, viewMode }))}
-          />
+        <div className="border-t border-slate-100/60 py-2">
+          <div className="property-map-filter-scroll property-map-filter-scroll--center px-4">
+            <FilterControls
+              layout="scrollable"
+              flat
+              centered
+              visitedFilter={listFilters.visited}
+              statusFilter={listFilters.status}
+              ratingFilter={listFilters.rating}
+              onOpenSheet={setOpenSheet}
+            />
+          </div>
         </div>
       </header>
 
-      <main className="flex-1 space-y-3 px-4 py-4 pb-6">
-        <article className="toss-card border-slate-200 p-3">
-          <FilterControls
-            visitedFilter={filters.visited}
-            statusFilter={filters.status}
-            ratingFilter={filters.rating}
-            onOpenSheet={setOpenSheet}
-          />
-        </article>
-
-        {query.isLoading ? <p className="px-1 text-[13px] text-slate-500">목록을 불러오는 중...</p> : null}
-        {query.error ? <p className="px-1 text-[13px] text-rose-500">{(query.error as Error).message}</p> : null}
+      <main className="flex flex-1 flex-col px-4 pb-24 pt-2">
+        {actor ? <CrawlQueueHomeBanner actor={actor} /> : null}
+        {query.isLoading ? <p className="mt-3 px-1 text-[13px] text-slate-500">목록을 불러오는 중...</p> : null}
+        {query.error ? <p className="mt-3 px-1 text-[13px] text-rose-500">{(query.error as Error).message}</p> : null}
 
         {filteredProperties.length === 0 ? (
-          <EmptyState
-            title="매물이 없어요."
-            description="필터를 바꾸거나 + 버튼으로 첫 매물을 추가하세요."
-            action={
-              <Button variant="primary" className="w-full" onClick={() => navigate("/properties/new")}>
-                추가하기
-              </Button>
-            }
-          />
+          <div className="flex flex-1 items-center justify-center py-6">
+            <EmptyState
+              className="w-full"
+              title="매물이 없어요."
+              description="필터를 바꾸거나 + 버튼으로 첫 매물을 추가하세요."
+            />
+          </div>
         ) : (
-          <div className="space-y-0">
-            {listPropertiesSorted.map((property, index) => (
-              <div key={property.id} className="relative flex gap-3 pb-3">
-                {index < listPropertiesSorted.length - 1 ? (
-                  <span className="absolute left-[15px] top-8 h-[calc(100%-8px)] w-px bg-slate-200" aria-hidden />
-                ) : null}
-                <div className="relative z-[1] flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-[12px] font-bold text-slate-700">
-                  {index + 1}
-                </div>
-                <Link to={`/properties/${property.id}`} className="toss-card block min-w-0 flex-1 border-slate-200">
-                  <div className="flex gap-3">
-                    <div className="h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-slate-100 bg-slate-100">
-                      {property.thumbnail_url ? (
-                        <img
-                          src={property.thumbnail_url}
-                          alt={property.title ?? "매물"}
-                          className="h-full w-full object-cover"
-                        />
-                      ) : null}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-[15px] font-bold text-slate-950">{property.title ?? "제목 없음"}</p>
-                      <p className="mt-0.5 truncate text-[12px] text-slate-500">{property.address ?? "주소 없음"}</p>
-                      <div className="mt-2 flex flex-wrap gap-1.5 text-[11px] font-semibold text-slate-600">
-                        <span className="rounded-md bg-slate-100 px-2 py-0.5">{property.visited ? "방문" : "미방문"}</span>
-                        <span className="rounded-md bg-slate-100 px-2 py-0.5">{statusLabel(property.decision_status)}</span>
-                      </div>
-                      <div className="mt-2">
-                        <PropertyRatingSummary property={property} compact />
-                      </div>
-                      <p className="mt-2 text-[14px] font-bold text-emerald-700">
-                        {formatWon(property.desired_price_value ?? property.current_price_value)}
+          <div className="divide-y divide-slate-100">
+            {listPropertiesSorted.map((property) => (
+              <div key={property.id} className="relative flex gap-2 py-4">
+                <Link
+                  to={`/properties/${property.id}`}
+                  className="flex min-w-0 flex-1 gap-4 transition active:opacity-80"
+                >
+                  <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-slate-100 bg-slate-50">
+                    {property.thumbnail_url ? (
+                      <img
+                        src={property.thumbnail_url}
+                        alt={property.title ?? "매물"}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : null}
+                  </div>
+                  <div className="min-w-0 flex-1 flex flex-col justify-between py-0.5">
+                    <div className="flex items-start justify-between gap-3">
+                      <p className="min-w-0 truncate text-[15px] font-bold text-slate-950">
+                        {property.title ?? "제목 없음"}
                       </p>
+                      <PriceDisplay
+                        value={property.current_price_value}
+                        size="sm"
+                        className="shrink-0 text-[15px] font-bold text-emerald-600"
+                        stopPropagation
+                      />
+                    </div>
+                    <p className="mt-1 truncate text-[12px] text-slate-500">{property.address ?? "주소 없음"}</p>
+                    <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+                      <CrawlStatusBadge property={property} />
+                      <span className={cn(
+                      "inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-medium",
+                      property.visited 
+                        ? "bg-emerald-50 text-emerald-700" 
+                        : "bg-slate-100 text-slate-500"
+                    )}>
+                      {property.visited ? "방문함" : "미방문"}
+                    </span>
+                    
+                    <span className={cn(
+                      "inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-medium",
+                      property.decision_status === "revisit" && "bg-amber-50 text-amber-700",
+                      property.decision_status === "review" && "bg-blue-50 text-blue-700",
+                      property.decision_status === "hold" && "bg-slate-100 text-slate-600",
+                      property.decision_status === "exclude" && "bg-rose-50 text-rose-700",
+                    )}>
+                      {statusLabel(property.decision_status)}
+                    </span>
+
+                    <PropertyRatingSummary property={property} compact />
                     </div>
                   </div>
                 </Link>
+                <FavoriteButton propertyId={property.id} className="self-start" />
               </div>
             ))}
           </div>
         )}
       </main>
+
+      <MapViewFloatingButton onClick={() => setFilters((current) => ({ ...current, viewMode: "map" }))} />
 
       {filterSheets}
     </div>

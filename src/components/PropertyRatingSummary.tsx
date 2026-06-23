@@ -18,11 +18,11 @@ export function PropertyRatingSummary({ property, compact = false }: PropertyRat
   }
 
   return (
-    <div className={`flex flex-wrap gap-1.5 ${compact ? "" : "gap-2"}`}>
+    <div className={`flex flex-wrap items-center gap-1.5 ${compact ? "" : "gap-2"}`}>
       {ratedItems.map((item) => (
         <span
           key={item.key}
-          className="inline-flex items-center gap-0.5 rounded-md bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700"
+          className="inline-flex items-center gap-0.5 rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-normal text-emerald-700"
         >
           <span>{item.shortLabel}</span>
           <span aria-hidden="true">★{property[item.key]}</span>

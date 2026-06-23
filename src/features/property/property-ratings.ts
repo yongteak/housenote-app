@@ -139,7 +139,7 @@ export function getRatingFilterLabel(criteria: RatingFilterCriteria): string {
 
   const hasMinimum =
     criteria.minCommute != null || criteria.minSchools != null || criteria.minConvenience != null;
-  return hasMinimum ? "평가 · 조건" : "평가 전체";
+  return hasMinimum ? "평가 · 조건" : "전체";
 }
 
 /**

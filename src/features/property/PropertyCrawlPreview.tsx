@@ -5,7 +5,7 @@
 import { lazy, Suspense, useState } from "react";
 
 import { CollapsibleSection } from "../../components/CollapsibleSection";
-import { formatWon } from "../../lib/format";
+import { PriceDisplay } from "../../components/PriceDisplay";
 import {
   type AreaUnit,
   formatAreaSpecLine,
@@ -169,12 +169,17 @@ export function PropertyCrawlPreview({ crawl }: PropertyCrawlPreviewProps) {
         <div className="pt-1.5 border-t border-slate-100 flex items-baseline justify-between">
           <span className="text-[13px] font-semibold text-slate-400 uppercase tracking-wider">등록 가격</span>
           <div className="text-right">
-            <p className="text-[26px] font-extrabold tracking-tight text-slate-950 leading-none">
-              {crawl.current_price_text ?? formatWon(crawl.current_price_value)}
-            </p>
-            {crawl.current_price_text && crawl.current_price_value != null ? (
-              <p className="text-[11px] text-slate-400 mt-1">({formatWon(crawl.current_price_value)})</p>
-            ) : null}
+            {crawl.current_price_value != null ? (
+              <PriceDisplay
+                value={crawl.current_price_value}
+                size="lg"
+                className="text-slate-950"
+              />
+            ) : (
+              <p className="text-[26px] font-extrabold tracking-tight text-slate-950 leading-none">
+                {crawl.current_price_text ?? "-"}
+              </p>
+            )}
           </div>
         </div>
 

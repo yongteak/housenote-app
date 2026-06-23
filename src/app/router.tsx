@@ -2,19 +2,24 @@
  * @file router.tsx
  * @description 발품 앱 라우팅 정의. 로그인/목록/상세 작성 화면을 연결한다.
  */
-import { Navigate, createBrowserRouter } from "react-router-dom";
+import { Navigate, createBrowserRouter, useParams } from "react-router-dom";
 
 import { MobileShell } from "./MobileShell";
 import { RequireAuth } from "./RequireAuth";
 import { ActivityPage } from "../pages/ActivityPage";
-import { LoginPage } from "../pages/LoginPage";
 import { ProfilePage } from "../pages/ProfilePage";
+import { PropertyDetailPage } from "../pages/PropertyDetailPage";
 import { PropertyEditorPage } from "../pages/PropertyEditorPage";
 import { PropertyListPage } from "../pages/PropertyListPage";
 import { FavoritesPage } from "../pages/activity/FavoritesPage";
 import { HistoryPage } from "../pages/activity/HistoryPage";
 import { RatedItemsPage } from "../pages/activity/RatedItemsPage";
 import { RecentViewsPage } from "../pages/activity/RecentViewsPage";
+
+function PropertyEditRedirect() {
+  const { propertyId } = useParams();
+  return <Navigate to={`/properties/${propertyId}`} replace />;
+}
 
 export const appRouter = createBrowserRouter([
   {
@@ -85,7 +90,15 @@ export const appRouter = createBrowserRouter([
         path: "properties/new",
         element: (
           <RequireAuth>
-            <PropertyEditorPage mode="create" />
+            <PropertyEditorPage />
+          </RequireAuth>
+        ),
+      },
+      {
+        path: "properties/:propertyId/edit",
+        element: (
+          <RequireAuth>
+            <PropertyEditRedirect />
           </RequireAuth>
         ),
       },
@@ -93,7 +106,7 @@ export const appRouter = createBrowserRouter([
         path: "properties/:propertyId",
         element: (
           <RequireAuth>
-            <PropertyEditorPage mode="edit" />
+            <PropertyDetailPage />
           </RequireAuth>
         ),
       },

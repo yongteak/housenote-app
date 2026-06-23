@@ -2,8 +2,38 @@
  * @file property-crawl.mapper.ts
  * @description 크롤 페이로드를 폼 값·DB 저장 payload로 변환한다.
  */
-import type { PropertyFormValues } from "../../types/property";
+import type { PropertyFormValues, PropertyRecord } from "../../types/property";
 import type { PropertyCrawlPayload } from "../../types/property-crawl";
+
+/**
+ * DB 레코드에서 크롤 미리보기·지도용 페이로드를 복원한다.
+ * @param record 저장된 매물
+ */
+export function recordToCrawlPayload(record: PropertyRecord): PropertyCrawlPayload {
+  const metadata = (record.metadata ?? {}) as PropertyCrawlPayload["metadata"];
+
+  return {
+    source_url: record.source_url,
+    source_domain: record.source_domain ?? undefined,
+    source_listing_id: record.source_listing_id ?? undefined,
+    title: record.title,
+    property_type: record.property_type ?? undefined,
+    deal_type: record.deal_type,
+    address: record.address,
+    road_address: record.road_address ?? undefined,
+    latitude: record.latitude ?? undefined,
+    longitude: record.longitude ?? undefined,
+    current_price_text: record.current_price_text ?? undefined,
+    current_price_value: record.current_price_value,
+    area_supply_m2: record.area_supply_m2 ?? undefined,
+    area_private_m2: record.area_private_m2 ?? undefined,
+    floor_info: record.floor_info ?? undefined,
+    direction: record.direction ?? undefined,
+    thumbnail_url: record.thumbnail_url,
+    image_urls: record.image_urls ?? [],
+    metadata,
+  };
+}
 
 /**
  * 크롤 결과를 폼 기본 필드에 반영한다.

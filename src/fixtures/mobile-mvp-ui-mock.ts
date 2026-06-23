@@ -132,6 +132,10 @@ function resolveActor(actor: SelectedActor | null) {
   };
 }
 
+export function getMockProperty(propertyId: string, actor: SelectedActor | null): PropertyRecord | null {
+  return getMockProperties(actor).find((property) => property.id === propertyId) ?? null;
+}
+
 export function getMockProperties(actor: SelectedActor | null): PropertyRecord[] {
   const profile = resolveActor(actor);
 

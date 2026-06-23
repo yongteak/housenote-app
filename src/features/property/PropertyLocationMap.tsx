@@ -43,6 +43,8 @@ export function PropertyLocationMap({ crawl }: PropertyLocationMapProps) {
         zoom={zoom}
         className="h-44 w-full"
         scrollWheelZoom={false}
+        touchZoom
+        dragging
         zoomControl={false}
         attributionControl
       >

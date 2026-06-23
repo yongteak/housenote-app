@@ -15,26 +15,55 @@ type SelectorFieldProps = {
   valueLabel: string;
   onClick: () => void;
   className?: string;
+  compact?: boolean;
+  scrollable?: boolean;
 };
 
-export function SelectorField({ label, valueLabel, onClick, className }: SelectorFieldProps) {
+export function SelectorField({
+  label,
+  valueLabel,
+  onClick,
+  className,
+  compact = false,
+  scrollable = false,
+}: SelectorFieldProps) {
+  const showLabel = !compact || scrollable;
+
   return (
-    <button type="button" className={cn("ui-selector-field", className)} onClick={onClick}>
-      <span className="text-[12px] font-medium text-slate-500">{label}</span>
-      <span className="flex items-center gap-1.5 text-[13px] font-semibold text-slate-900">
-        {valueLabel}
-        <ChevronDown className="h-4 w-4 text-slate-400" />
+    <button
+      type="button"
+      className={cn(
+        "ui-selector-field cursor-pointer",
+        scrollable ? "w-auto shrink-0 gap-2 px-3 py-2" : "min-w-0",
+        compact && !scrollable && "ui-selector-field--compact justify-center gap-1 px-2 py-1.5",
+        className,
+      )}
+      onClick={onClick}
+    >
+      {showLabel ? (
+        <span className="shrink-0 whitespace-nowrap text-[12px] font-medium text-slate-500">{label}</span>
+      ) : null}
+      <span
+        className={cn(
+          "flex items-center gap-1 font-semibold text-slate-900",
+          scrollable ? "shrink-0 gap-1.5 text-[13px]" : "min-w-0",
+          compact && !scrollable ? "text-[12px]" : !scrollable ? "gap-1.5 text-[13px]" : null,
+        )}
+      >
+        <span className={cn(scrollable ? "whitespace-nowrap" : "truncate whitespace-nowrap")}>{valueLabel}</span>
+        <ChevronDown className={cn("shrink-0 text-slate-400", compact && !scrollable ? "h-3.5 w-3.5" : "h-4 w-4")} />
       </span>
     </button>
   );
 }
 
 type SelectorListProps<T extends string> = {
-  title: string;
+  title?: string;
   selectedValue: T;
   options: SelectorOption<T>[];
   onSelect: (value: T) => void;
   trailing?: ReactNode;
+  className?: string;
 };
 
 export function SelectorList<T extends string>({
@@ -43,13 +72,18 @@ export function SelectorList<T extends string>({
   options,
   onSelect,
   trailing,
+  className,
 }: SelectorListProps<T>) {
+  const showHeader = Boolean(title || trailing);
+
   return (
-    <div className="space-y-3 px-4 pb-6 pt-2">
-      <div className="flex items-center justify-between">
-        <p className="text-[14px] font-bold text-slate-900">{title}</p>
-        {trailing}
-      </div>
+    <div className={cn("px-4 pb-6 pt-2", showHeader && "space-y-3", className)}>
+      {showHeader ? (
+        <div className="flex items-center justify-between">
+          {title ? <p className="text-[14px] font-bold text-slate-900">{title}</p> : <span aria-hidden />}
+          {trailing}
+        </div>
+      ) : null}
       <div className="space-y-2">
         {options.map((option) => {
           const isSelected = selectedValue === option.value;

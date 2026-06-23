@@ -5,7 +5,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { LoginProfileAvatar } from "../components/login/LoginProfileAvatar";
+import { ActorAvatar } from "../components/actor/ActorAvatar";
+import { getActorAvatarUrlByVariant } from "../features/actor/actor-avatars";
 import { Button } from "../components/ui/Button";
 import { authenticateByPhoneSuffix } from "../features/actor/actor.api";
 import { useAuth } from "../lib/auth-context";
@@ -13,8 +14,8 @@ import { cn } from "../lib/cn";
 
 /** 로그인 프로필 옵션 */
 const LOGIN_PROFILES = [
-  { phoneSuffix: "1111", label: "아빠", variant: "dad" as const },
-  { phoneSuffix: "2222", label: "엄마", variant: "mom" as const },
+  { phoneSuffix: "1111", label: "아빠", variant: "dad" as const, avatarUrl: getActorAvatarUrlByVariant("dad") },
+  { phoneSuffix: "2222", label: "엄마", variant: "mom" as const, avatarUrl: getActorAvatarUrlByVariant("mom") },
 ];
 
 /**
@@ -102,7 +103,7 @@ export function LoginPage() {
                     isSelected ? "ring-emerald-300" : "ring-transparent",
                   )}
                 >
-                  <LoginProfileAvatar variant={profile.variant} />
+                  <ActorAvatar variant={profile.variant} size="lg" className="h-24 w-24" label={profile.label} />
                 </div>
                 <span className="text-[18px] font-bold text-slate-900">{profile.label}</span>
               </button>

@@ -75,7 +75,7 @@ export function getActualPriceValue(property: PropertyRecord): number | null {
     readMetadataNumber(property.metadata, ["basicInfo", "priceInfo", "recentTradePrice"]);
 
   if (fromMetadata != null) return fromMetadata;
-  if (property.desired_price_value != null) return property.desired_price_value;
+  if (property.current_price_value != null) return property.current_price_value;
   return null;
 }
 
